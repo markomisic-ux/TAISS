@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TAISS - Kalkulator Cena i Profita</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --brown-dark: #3d3225;
+            --brown: #5c4a3a;
+            --gold: #b8956e;
+            --gold-light: #d4c4a8;
+            --cream: #faf8f5;
+            --white: #ffffff;
+            --gray: #888;
+            --green: #4CAF50;
+            --red: #e74c3c;
+        }
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, var(--cream) 0%, #f5f0eb 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+        }
+        
+        .logo {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2rem;
+            letter-spacing: 0.3em;
+            color: var(--brown-dark);
+            margin-bottom: 5px;
+        }
+        
+        .subtitle {
+            font-size: 11px;
+            color: var(--gold);
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+        }
+        
+        .app-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.5rem;
+            color: var(--brown);
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        /* Card */
+        .card {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(61, 50, 37, 0.1);
+        }
+        
+        .card-title {
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--brown);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        /* Input Groups */
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        .input-group label {
+            display: block;
+            font-size: 11px;
+            color: var(--gray);
+            margin-bottom: 8px;
+            letter-spacing: 0.05em;
+        }
+        
+        .input-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .input-row input {
+            flex: 1;
+        }
+        
+        input[type="number"], input[type="text"], select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #eee;
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: inherit;
+            transition: all 0.3s;
+            background: var(--cream);
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--gold);
+            background: var(--white);
+        }
+        
+        .input-suffix {
+            font-size: 14px;
+            color: var(--gray);
+            min-width: 40px;
+        }
+        
+        /* Preset Buttons */
+        .presets {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .preset-btn {
+            padding: 10px 16px;
+            border: 2px solid var(--gold-light);
+            border-radius: 25px;
+            background: var(--white);
+            font-size: 12px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: var(--brown);
+        }
+        
+        .preset-btn:hover, .preset-btn.active {
+            background: var(--gold);
+            border-color: var(--gold);
+            color: var(--white);
+        }
+        
+        /* Divider */
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--gold-light), transparent);
+            margin: 25px 0;
+        }
+        
+        /* Results */
+        .results {
+            background: linear-gradient(135deg, var(--brown-dark) 0%, var(--brown) 100%);
+            border-radius: 20px;
+            padding: 25px;
+            color: var(--white);
+        }
+        
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .result-row:last-child {
+            border-bottom: none;
+        }
+        
+        .result-label {
+            font-size: 13px;
+            color: var(--gold-light);
+        }
+        
+        .result-value {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .result-row.total {
+            margin-top: 10px;
+            padding-top: 20px;
+            border-top: 2px solid var(--gold);
+            border-bottom: none;
+        }
+        
+        .result-row.total .result-label {
+            font-size: 14px;
+            color: var(--white);
+            font-weight: 500;
+        }
+        
+        .result-row.total .result-value {
+            font-size: 24px;
+            color: var(--gold);
+        }
+        
+        .result-row.profit .result-value {
+            color: #7bed9f;
+        }
+        
+        .result-row.margin .result-value {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+        
+        .margin-good {
+            background: rgba(123, 237, 159, 0.2);
+            color: #7bed9f;
+        }
+        
+        .margin-ok {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+        }
+        
+        .margin-bad {
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+        }
+        
+        /* Quantity Calculator */
+        .quantity-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .quantity-title {
+            font-size: 11px;
+            color: var(--gold-light);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+        }
+        
+        .quantity-input {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .quantity-input input {
+            width: 80px;
+            padding: 12px;
+            border: 2px solid var(--gold);
+            border-radius: 10px;
+            font-size: 18px;
+            text-align: center;
+            background: rgba(255,255,255,0.1);
+            color: var(--white);
+            font-family: inherit;
+        }
+        
+        .quantity-input input:focus {
+            outline: none;
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .quantity-input span {
+            font-size: 14px;
+            color: var(--gold-light);
+        }
+        
+        .quantity-results {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .quantity-box {
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .quantity-box-label {
+            font-size: 10px;
+            color: var(--gold-light);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+        
+        .quantity-box-value {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--white);
+        }
+        
+        /* Save Button */
+        .save-section {
+            margin-top: 20px;
+        }
+        
+        .save-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+            border: none;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--brown-dark);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+        
+        .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(184, 149, 110, 0.4);
+        }
+        
+        /* Saved Products */
+        .saved-products {
+            margin-top: 20px;
+        }
+        
+        .saved-title {
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--brown);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .saved-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .saved-item {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .saved-item-info {
+            flex: 1;
+        }
+        
+        .saved-item-name {
+            font-weight: 500;
+            color: var(--brown-dark);
+            margin-bottom: 3px;
+        }
+        
+        .saved-item-details {
+            font-size: 12px;
+            color: var(--gray);
+        }
+        
+        .saved-item-price {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--gold);
+            margin-right: 15px;
+        }
+        
+        .saved-item-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .action-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .load-btn {
+            background: var(--cream);
+            color: var(--brown);
+        }
+        
+        .load-btn:hover {
+            background: var(--gold-light);
+        }
+        
+        .delete-btn {
+            background: #fee;
+            color: var(--red);
+        }
+        
+        .delete-btn:hover {
+            background: var(--red);
+            color: white;
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 30px;
+            color: var(--gray);
+            font-size: 13px;
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            color: var(--gray);
+            font-size: 11px;
+        }
+        
+        /* Gift Banner */
+        .gift-banner {
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+            border-radius: 15px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            text-align: center;
+            color: var(--brown-dark);
+        }
+        
+        .gift-banner-text {
+            font-size: 13px;
+            font-weight: 500;
+        }
+        
+        .gift-banner-emoji {
+            font-size: 20px;
+            margin-right: 8px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 400px) {
+            .quantity-results {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">TAISS</div>
+            <div class="subtitle">Aroma Candles & More</div>
+            <h1 class="app-title">🧮 Kalkulator Cena</h1>
+        </div>
+        
+        <!-- Gift Banner -->
+        <div class="gift-banner">
+            <span class="gift-banner-emoji">🎁</span>
+            <span class="gift-banner-text">Srećna Nova 2026! Poklon od Secret Santa 🎄</span>
+        </div>
+        
+        <!-- Cost Inputs -->
+        <div class="card">
+            <div class="card-title">📦 Troškovi Materijala</div>
+            
+            <!-- Presets -->
+            <div class="presets">
+                <button class="preset-btn" onclick="loadPreset('casa')">🥃 Čaša</button>
+                <button class="preset-btn" onclick="loadPreset('bubble')">🫧 Bubble</button>
+                <button class="preset-btn" onclick="loadPreset('srce')">💕 Srce</button>
+                <button class="preset-btn" onclick="loadPreset('set')">🎁 Set</button>
+                <button class="preset-btn" onclick="loadPreset('custom')">✏️ Custom</button>
+            </div>
+            
+            <div class="input-group">
+                <label>Naziv proizvoda</label>
+                <input type="text" id="productName" placeholder="npr. Božićna Čaša">
+            </div>
+            
+            <div class="input-group">
+                <label>Vosak (količina u g × cena po kg)</label>
+                <div class="input-row">
+                    <input type="number" id="waxGrams" placeholder="200" oninput="calculate()">
+                    <span>g ×</span>
+                    <input type="number" id="waxPrice" placeholder="800" oninput="calculate()">
+                    <span class="input-suffix">RSD/kg</span>
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <label>Miris / Ulje</label>
+                <div class="input-row">
+                    <input type="number" id="fragrancePrice" placeholder="150" oninput="calculate()">
+                    <span class="input-suffix">RSD</span>
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <label>Fitilj</label>
+                <div class="input-row">
+                    <input type="number" id="wickPrice" placeholder="30" oninput="calculate()">
+                    <span class="input-suffix">RSD</span>
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <label>Posuda / Staklo / Kalup</label>
+                <div class="input-row">
+                    <input type="number" id="containerPrice" placeholder="200" oninput="calculate()">
+                    <span class="input-suffix">RSD</span>
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <label>Dekoracija (trakice, ukrasi...)</label>
+                <div class="input-row">
+                    <input type="number" id="decorPrice" placeholder="50" oninput="calculate()">
+                    <span class="input-suffix">RSD</span>
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <label>Pakovanje (kutija, papir...)</label>
+                <div class="input-row">
+                    <input type="number" id="packagingPrice" placeholder="100" oninput="calculate()">
+                    <span class="input-suffix">RSD</span>
+                </div>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <div class="card-title">💰 Prodajna Cena</div>
+            
+            <div class="input-group">
+                <label>Cena po kojoj prodaješ</label>
+                <div class="input-row">
+                    <input type="number" id="sellPrice" placeholder="1490" oninput="calculate()">
+                    <span class="input-suffix">RSD</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Results -->
+        <div class="results">
+            <div class="result-row">
+                <span class="result-label">Vosak</span>
+                <span class="result-value" id="waxCost">0 RSD</span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Miris</span>
+                <span class="result-value" id="fragranceCost">0 RSD</span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Fitilj</span>
+                <span class="result-value" id="wickCost">0 RSD</span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Posuda</span>
+                <span class="result-value" id="containerCost">0 RSD</span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Dekoracija</span>
+                <span class="result-value" id="decorCost">0 RSD</span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Pakovanje</span>
+                <span class="result-value" id="packagingCost">0 RSD</span>
+            </div>
+            
+            <div class="result-row total">
+                <span class="result-label">UKUPNI TROŠKOVI</span>
+                <span class="result-value" id="totalCost">0 RSD</span>
+            </div>
+            
+            <div class="result-row profit">
+                <span class="result-label">PROFIT</span>
+                <span class="result-value" id="profit">0 RSD</span>
+            </div>
+            
+            <div class="result-row margin">
+                <span class="result-label">MARŽA</span>
+                <span class="result-value" id="margin">0%</span>
+            </div>
+            
+            <!-- Quantity Calculator -->
+            <div class="quantity-section">
+                <div class="quantity-title">📊 Izračunaj za više komada</div>
+                <div class="quantity-input">
+                    <input type="number" id="quantity" value="10" min="1" oninput="calculate()">
+                    <span>komada</span>
+                </div>
+                <div class="quantity-results">
+                    <div class="quantity-box">
+                        <div class="quantity-box-label">Ukupan prihod</div>
+                        <div class="quantity-box-value" id="totalRevenue">0</div>
+                    </div>
+                    <div class="quantity-box">
+                        <div class="quantity-box-label">Ukupan profit</div>
+                        <div class="quantity-box-value" id="totalProfit">0</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Save Button -->
+            <div class="save-section">
+                <button class="save-btn" onclick="saveProduct()">💾 Sačuvaj proizvod</button>
+            </div>
+        </div>
+        
+        <!-- Saved Products -->
+        <div class="card saved-products" id="savedSection" style="display:none;">
+            <div class="saved-title">📋 Sačuvani proizvodi</div>
+            <div class="saved-list" id="savedList"></div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            TAISS Kalkulator v1.0 • Srećna Nova 2026! 🎄
+        </div>
+    </div>
+    
+    <script>
+        // Preseti za različite proizvode
+        const presets = {
+            casa: {
+                name: 'Praznična Čaša',
+                waxGrams: 200,
+                waxPrice: 800,
+                fragrance: 150,
+                wick: 30,
+                container: 250,
+                decor: 50,
+                packaging: 100,
+                sellPrice: 1490
+            },
+            bubble: {
+                name: 'Bubble Sveća',
+                waxGrams: 150,
+                waxPrice: 800,
+                fragrance: 120,
+                wick: 25,
+                container: 0,
+                decor: 30,
+                packaging: 80,
+                sellPrice: 990
+            },
+            srce: {
+                name: 'Srce sa Mašnom',
+                waxGrams: 180,
+                waxPrice: 800,
+                fragrance: 140,
+                wick: 25,
+                container: 0,
+                decor: 80,
+                packaging: 100,
+                sellPrice: 1190
+            },
+            set: {
+                name: 'Božićni Set',
+                waxGrams: 400,
+                waxPrice: 800,
+                fragrance: 280,
+                wick: 60,
+                container: 300,
+                decor: 150,
+                packaging: 200,
+                sellPrice: 2490
+            },
+            custom: {
+                name: '',
+                waxGrams: '',
+                waxPrice: 800,
+                fragrance: '',
+                wick: '',
+                container: '',
+                decor: '',
+                packaging: '',
+                sellPrice: ''
+            }
+        };
+        
+        // Load preset
+        function loadPreset(type) {
+            const preset = presets[type];
+            
+            // Update button styles
+            document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Fill inputs
+            document.getElementById('productName').value = preset.name;
+            document.getElementById('waxGrams').value = preset.waxGrams;
+            document.getElementById('waxPrice').value = preset.waxPrice;
+            document.getElementById('fragrancePrice').value = preset.fragrance;
+            document.getElementById('wickPrice').value = preset.wick;
+            document.getElementById('containerPrice').value = preset.container;
+            document.getElementById('decorPrice').value = preset.decor;
+            document.getElementById('packagingPrice').value = preset.packaging;
+            document.getElementById('sellPrice').value = preset.sellPrice;
+            
+            calculate();
+        }
+        
+        // Calculate costs and profit
+        function calculate() {
+            const waxGrams = parseFloat(document.getElementById('waxGrams').value) || 0;
+            const waxPricePerKg = parseFloat(document.getElementById('waxPrice').value) || 0;
+            const fragrancePrice = parseFloat(document.getElementById('fragrancePrice').value) || 0;
+            const wickPrice = parseFloat(document.getElementById('wickPrice').value) || 0;
+            const containerPrice = parseFloat(document.getElementById('containerPrice').value) || 0;
+            const decorPrice = parseFloat(document.getElementById('decorPrice').value) || 0;
+            const packagingPrice = parseFloat(document.getElementById('packagingPrice').value) || 0;
+            const sellPrice = parseFloat(document.getElementById('sellPrice').value) || 0;
+            const quantity = parseInt(document.getElementById('quantity').value) || 1;
+            
+            // Calculate wax cost
+            const waxCost = (waxGrams / 1000) * waxPricePerKg;
+            
+            // Total costs
+            const totalCost = waxCost + fragrancePrice + wickPrice + containerPrice + decorPrice + packagingPrice;
+            
+            // Profit
+            const profit = sellPrice - totalCost;
+            
+            // Margin
+            const margin = sellPrice > 0 ? (profit / sellPrice) * 100 : 0;
+            
+            // Update display
+            document.getElementById('waxCost').textContent = Math.round(waxCost).toLocaleString('sr') + ' RSD';
+            document.getElementById('fragranceCost').textContent = fragrancePrice.toLocaleString('sr') + ' RSD';
+            document.getElementById('wickCost').textContent = wickPrice.toLocaleString('sr') + ' RSD';
+            document.getElementById('containerCost').textContent = containerPrice.toLocaleString('sr') + ' RSD';
+            document.getElementById('decorCost').textContent = decorPrice.toLocaleString('sr') + ' RSD';
+            document.getElementById('packagingCost').textContent = packagingPrice.toLocaleString('sr') + ' RSD';
+            document.getElementById('totalCost').textContent = Math.round(totalCost).toLocaleString('sr') + ' RSD';
+            document.getElementById('profit').textContent = Math.round(profit).toLocaleString('sr') + ' RSD';
+            
+            // Margin with color
+            const marginEl = document.getElementById('margin');
+            marginEl.textContent = Math.round(margin) + '%';
+            marginEl.className = 'result-value';
+            if (margin >= 50) {
+                marginEl.classList.add('margin-good');
+            } else if (margin >= 30) {
+                marginEl.classList.add('margin-ok');
+            } else {
+                marginEl.classList.add('margin-bad');
+            }
+            
+            // Quantity calculations
+            document.getElementById('totalRevenue').textContent = (sellPrice * quantity).toLocaleString('sr') + ' RSD';
+            document.getElementById('totalProfit').textContent = Math.round(profit * quantity).toLocaleString('sr') + ' RSD';
+        }
+        
+        // Save product
+        function saveProduct() {
+            const name = document.getElementById('productName').value || 'Bez imena';
+            const sellPrice = parseFloat(document.getElementById('sellPrice').value) || 0;
+            const totalCost = calculateTotalCost();
+            const profit = sellPrice - totalCost;
+            
+            const product = {
+                id: Date.now(),
+                name: name,
+                sellPrice: sellPrice,
+                totalCost: totalCost,
+                profit: profit,
+                data: {
+                    waxGrams: document.getElementById('waxGrams').value,
+                    waxPrice: document.getElementById('waxPrice').value,
+                    fragrance: document.getElementById('fragrancePrice').value,
+                    wick: document.getElementById('wickPrice').value,
+                    container: document.getElementById('containerPrice').value,
+                    decor: document.getElementById('decorPrice').value,
+                    packaging: document.getElementById('packagingPrice').value
+                }
+            };
+            
+            // Get saved products
+            let products = JSON.parse(localStorage.getItem('taiss_products') || '[]');
+            products.unshift(product);
+            localStorage.setItem('taiss_products', JSON.stringify(products));
+            
+            renderSavedProducts();
+            
+            // Show confirmation
+            alert('✅ Proizvod "' + name + '" je sačuvan!');
+        }
+        
+        function calculateTotalCost() {
+            const waxGrams = parseFloat(document.getElementById('waxGrams').value) || 0;
+            const waxPricePerKg = parseFloat(document.getElementById('waxPrice').value) || 0;
+            const waxCost = (waxGrams / 1000) * waxPricePerKg;
+            
+            return waxCost + 
+                (parseFloat(document.getElementById('fragrancePrice').value) || 0) +
+                (parseFloat(document.getElementById('wickPrice').value) || 0) +
+                (parseFloat(document.getElementById('containerPrice').value) || 0) +
+                (parseFloat(document.getElementById('decorPrice').value) || 0) +
+                (parseFloat(document.getElementById('packagingPrice').value) || 0);
+        }
+        
+        // Load saved product
+        function loadProduct(id) {
+            const products = JSON.parse(localStorage.getItem('taiss_products') || '[]');
+            const product = products.find(p => p.id === id);
+            
+            if (product) {
+                document.getElementById('productName').value = product.name;
+                document.getElementById('waxGrams').value = product.data.waxGrams;
+                document.getElementById('waxPrice').value = product.data.waxPrice;
+                document.getElementById('fragrancePrice').value = product.data.fragrance;
+                document.getElementById('wickPrice').value = product.data.wick;
+                document.getElementById('containerPrice').value = product.data.container;
+                document.getElementById('decorPrice').value = product.data.decor;
+                document.getElementById('packagingPrice').value = product.data.packaging;
+                document.getElementById('sellPrice').value = product.sellPrice;
+                
+                calculate();
+                
+                // Scroll to top
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+        
+        // Delete product
+        function deleteProduct(id) {
+            if (confirm('Da li želiš da obrišeš ovaj proizvod?')) {
+                let products = JSON.parse(localStorage.getItem('taiss_products') || '[]');
+                products = products.filter(p => p.id !== id);
+                localStorage.setItem('taiss_products', JSON.stringify(products));
+                renderSavedProducts();
+            }
+        }
+        
+        // Render saved products
+        function renderSavedProducts() {
+            const products = JSON.parse(localStorage.getItem('taiss_products') || '[]');
+            const section = document.getElementById('savedSection');
+            const list = document.getElementById('savedList');
+            
+            if (products.length === 0) {
+                section.style.display = 'none';
+                return;
+            }
+            
+            section.style.display = 'block';
+            
+            list.innerHTML = products.map(p => `
+                <div class="saved-item">
+                    <div class="saved-item-info">
+                        <div class="saved-item-name">${p.name}</div>
+                        <div class="saved-item-details">Trošak: ${Math.round(p.totalCost).toLocaleString('sr')} RSD • Profit: ${Math.round(p.profit).toLocaleString('sr')} RSD</div>
+                    </div>
+                    <div class="saved-item-price">${p.sellPrice.toLocaleString('sr')}</div>
+                    <div class="saved-item-actions">
+                        <button class="action-btn load-btn" onclick="loadProduct(${p.id})" title="Učitaj">📝</button>
+                        <button class="action-btn delete-btn" onclick="deleteProduct(${p.id})" title="Obriši">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Initialize
+        calculate();
+        renderSavedProducts();
+    </script>
+</body>
+</html>

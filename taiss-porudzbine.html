@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TAISS - Praćenje Porudžbina</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --brown-dark: #3d3225;
+            --brown: #5c4a3a;
+            --gold: #b8956e;
+            --gold-light: #d4c4a8;
+            --cream: #faf8f5;
+            --white: #ffffff;
+            --gray: #888;
+            --gray-light: #aaa;
+            --green: #27ae60;
+            --blue: #3498db;
+            --orange: #f39c12;
+            --red: #e74c3c;
+        }
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, var(--cream) 0%, #f5f0eb 100%);
+            min-height: 100vh;
+            padding: 20px;
+            padding-bottom: 100px;
+        }
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding: 20px;
+        }
+        
+        .logo {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2rem;
+            letter-spacing: 0.3em;
+            color: var(--brown-dark);
+            margin-bottom: 5px;
+        }
+        
+        .subtitle {
+            font-size: 11px;
+            color: var(--gold);
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+        }
+        
+        .app-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.5rem;
+            color: var(--brown);
+            margin-top: 20px;
+        }
+        
+        /* Gift Banner */
+        .gift-banner {
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+            border-radius: 15px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            text-align: center;
+            color: var(--brown-dark);
+        }
+        
+        .gift-banner-text {
+            font-size: 13px;
+            font-weight: 500;
+        }
+        
+        /* Stats Cards */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 15px 10px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(61, 50, 37, 0.08);
+        }
+        
+        .stat-number {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--brown-dark);
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 9px;
+            color: var(--gray);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .stat-card.new .stat-number { color: var(--blue); }
+        .stat-card.working .stat-number { color: var(--orange); }
+        .stat-card.sent .stat-number { color: var(--gold); }
+        .stat-card.done .stat-number { color: var(--green); }
+        
+        /* Search & Filter */
+        .search-section {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(61, 50, 37, 0.08);
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #eee;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: inherit;
+            margin-bottom: 10px;
+            background: var(--cream);
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: var(--gold);
+            background: var(--white);
+        }
+        
+        .filter-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-btn {
+            padding: 8px 14px;
+            border: none;
+            border-radius: 20px;
+            font-size: 11px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: var(--cream);
+            color: var(--brown);
+        }
+        
+        .filter-btn:hover, .filter-btn.active {
+            background: var(--brown-dark);
+            color: var(--white);
+        }
+        
+        .filter-btn.active.new { background: var(--blue); }
+        .filter-btn.active.working { background: var(--orange); }
+        .filter-btn.active.sent { background: var(--gold); }
+        .filter-btn.active.done { background: var(--green); }
+        
+        /* Orders List */
+        .orders-section {
+            margin-bottom: 20px;
+        }
+        
+        .section-title {
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--brown);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .orders-count {
+            font-weight: 400;
+            color: var(--gray);
+        }
+        
+        .orders-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .order-card {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 18px;
+            box-shadow: 0 4px 15px rgba(61, 50, 37, 0.08);
+            border-left: 4px solid var(--gray-light);
+        }
+        
+        .order-card.new { border-left-color: var(--blue); }
+        .order-card.working { border-left-color: var(--orange); }
+        .order-card.sent { border-left-color: var(--gold); }
+        .order-card.done { border-left-color: var(--green); }
+        
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+        
+        .order-customer {
+            font-weight: 600;
+            color: var(--brown-dark);
+            font-size: 15px;
+            margin-bottom: 3px;
+        }
+        
+        .order-date {
+            font-size: 11px;
+            color: var(--gray);
+        }
+        
+        .order-total {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--gold);
+        }
+        
+        .order-items {
+            font-size: 13px;
+            color: var(--gray);
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+        
+        .order-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .order-status {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .order-status.new {
+            background: rgba(52, 152, 219, 0.15);
+            color: var(--blue);
+        }
+        .order-status.working {
+            background: rgba(243, 156, 18, 0.15);
+            color: var(--orange);
+        }
+        .order-status.sent {
+            background: rgba(184, 149, 110, 0.15);
+            color: var(--gold);
+        }
+        .order-status.done {
+            background: rgba(39, 174, 96, 0.15);
+            color: var(--green);
+        }
+        
+        .order-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            background: var(--cream);
+        }
+        
+        .action-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        .action-btn.next {
+            background: var(--green);
+            color: white;
+        }
+        
+        .action-btn.delete {
+            background: #fee;
+            color: var(--red);
+        }
+        
+        .action-btn.delete:hover {
+            background: var(--red);
+            color: white;
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: var(--gray);
+        }
+        
+        .empty-state-emoji {
+            font-size: 50px;
+            margin-bottom: 15px;
+        }
+        
+        .empty-state-text {
+            font-size: 14px;
+        }
+        
+        /* Add Button (FAB) */
+        .fab {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+            border: none;
+            cursor: pointer;
+            font-size: 28px;
+            color: var(--brown-dark);
+            box-shadow: 0 6px 25px rgba(184, 149, 110, 0.4);
+            transition: all 0.3s;
+        }
+        
+        .fab:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 30px rgba(184, 149, 110, 0.5);
+        }
+        
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+        
+        .modal-overlay.open {
+            display: flex;
+        }
+        
+        .modal {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 25px;
+            width: 100%;
+            max-width: 400px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.5rem;
+            color: var(--brown-dark);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-size: 11px;
+            color: var(--gray);
+            margin-bottom: 6px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+        
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #eee;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: inherit;
+            background: var(--cream);
+        }
+        
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--gold);
+            background: var(--white);
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .modal-btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .modal-btn.cancel {
+            background: var(--cream);
+            color: var(--brown);
+        }
+        
+        .modal-btn.save {
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+            color: var(--brown-dark);
+        }
+        
+        .modal-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        /* Monthly Stats */
+        .monthly-stats {
+            background: linear-gradient(135deg, var(--brown-dark) 0%, var(--brown) 100%);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            color: var(--white);
+        }
+        
+        .monthly-title {
+            font-size: 11px;
+            color: var(--gold-light);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+        }
+        
+        .monthly-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+        }
+        
+        .monthly-label {
+            font-size: 13px;
+            color: var(--gold-light);
+        }
+        
+        .monthly-value {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .monthly-value.highlight {
+            color: var(--gold);
+            font-size: 20px;
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            color: var(--gray);
+            font-size: 11px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 400px) {
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">TAISS</div>
+            <div class="subtitle">Aroma Candles & More</div>
+            <h1 class="app-title">📦 Praćenje Porudžbina</h1>
+        </div>
+        
+        <!-- Gift Banner -->
+        <div class="gift-banner">
+            <span>🎁</span>
+            <span class="gift-banner-text">Srećna Nova 2026! Poklon od Secret Santa 🎄</span>
+        </div>
+        
+        <!-- Stats -->
+        <div class="stats">
+            <div class="stat-card new">
+                <div class="stat-number" id="statNew">0</div>
+                <div class="stat-label">Nove</div>
+            </div>
+            <div class="stat-card working">
+                <div class="stat-number" id="statWorking">0</div>
+                <div class="stat-label">U izradi</div>
+            </div>
+            <div class="stat-card sent">
+                <div class="stat-number" id="statSent">0</div>
+                <div class="stat-label">Poslate</div>
+            </div>
+            <div class="stat-card done">
+                <div class="stat-number" id="statDone">0</div>
+                <div class="stat-label">Završene</div>
+            </div>
+        </div>
+        
+        <!-- Monthly Stats -->
+        <div class="monthly-stats">
+            <div class="monthly-title">📊 Statistika ovog meseca</div>
+            <div class="monthly-row">
+                <span class="monthly-label">Ukupno porudžbina</span>
+                <span class="monthly-value" id="monthlyOrders">0</span>
+            </div>
+            <div class="monthly-row">
+                <span class="monthly-label">Ukupan prihod</span>
+                <span class="monthly-value highlight" id="monthlyRevenue">0 RSD</span>
+            </div>
+        </div>
+        
+        <!-- Search & Filter -->
+        <div class="search-section">
+            <input type="text" class="search-input" id="searchInput" placeholder="🔍 Pretraži po imenu ili proizvodu..." oninput="renderOrders()">
+            <div class="filter-buttons">
+                <button class="filter-btn active" onclick="setFilter('all')">Sve</button>
+                <button class="filter-btn new" onclick="setFilter('new')">🔵 Nove</button>
+                <button class="filter-btn working" onclick="setFilter('working')">🟠 U izradi</button>
+                <button class="filter-btn sent" onclick="setFilter('sent')">🟡 Poslate</button>
+                <button class="filter-btn done" onclick="setFilter('done')">🟢 Završene</button>
+            </div>
+        </div>
+        
+        <!-- Orders List -->
+        <div class="orders-section">
+            <div class="section-title">
+                Porudžbine
+                <span class="orders-count" id="ordersCount">(0)</span>
+            </div>
+            <div class="orders-list" id="ordersList">
+                <div class="empty-state">
+                    <div class="empty-state-emoji">📦</div>
+                    <div class="empty-state-text">Nema porudžbina.<br>Klikni + da dodaš prvu!</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            TAISS Porudžbine v1.0 • Srećna Nova 2026! 🎄
+        </div>
+    </div>
+    
+    <!-- Add Button -->
+    <button class="fab" onclick="openModal()">+</button>
+    
+    <!-- Modal -->
+    <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+        <div class="modal" onclick="event.stopPropagation()">
+            <h2 class="modal-title">📝 Nova Porudžbina</h2>
+            
+            <div class="form-group">
+                <label>Ime kupca</label>
+                <input type="text" id="customerName" placeholder="npr. Marija Petrović">
+            </div>
+            
+            <div class="form-group">
+                <label>Telefon</label>
+                <input type="tel" id="customerPhone" placeholder="npr. 069 123 4567">
+            </div>
+            
+            <div class="form-group">
+                <label>Adresa za dostavu</label>
+                <input type="text" id="customerAddress" placeholder="npr. Beograd, Knez Mihailova 10">
+            </div>
+            
+            <div class="form-group">
+                <label>Proizvodi</label>
+                <textarea id="orderItems" placeholder="npr. 2x Božićna Čaša, 1x Bubble Sveća"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>Ukupna cena (RSD)</label>
+                <input type="number" id="orderTotal" placeholder="npr. 2980">
+            </div>
+            
+            <div class="form-group">
+                <label>Napomena</label>
+                <textarea id="orderNote" placeholder="npr. Poklon pakovanje, dostaviti pre 18h"></textarea>
+            </div>
+            
+            <div class="modal-buttons">
+                <button class="modal-btn cancel" onclick="closeModal()">Otkaži</button>
+                <button class="modal-btn save" onclick="saveOrder()">💾 Sačuvaj</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let orders = JSON.parse(localStorage.getItem('taiss_orders') || '[]');
+        let currentFilter = 'all';
+        
+        const statusFlow = ['new', 'working', 'sent', 'done'];
+        const statusLabels = {
+            new: 'Nova',
+            working: 'U izradi',
+            sent: 'Poslata',
+            done: 'Završena'
+        };
+        
+        function openModal() {
+            document.getElementById('modalOverlay').classList.add('open');
+        }
+        
+        function closeModal(event) {
+            if (!event || event.target === document.getElementById('modalOverlay')) {
+                document.getElementById('modalOverlay').classList.remove('open');
+                clearForm();
+            }
+        }
+        
+        function clearForm() {
+            document.getElementById('customerName').value = '';
+            document.getElementById('customerPhone').value = '';
+            document.getElementById('customerAddress').value = '';
+            document.getElementById('orderItems').value = '';
+            document.getElementById('orderTotal').value = '';
+            document.getElementById('orderNote').value = '';
+        }
+        
+        function saveOrder() {
+            const name = document.getElementById('customerName').value.trim();
+            const phone = document.getElementById('customerPhone').value.trim();
+            const address = document.getElementById('customerAddress').value.trim();
+            const items = document.getElementById('orderItems').value.trim();
+            const total = parseFloat(document.getElementById('orderTotal').value) || 0;
+            const note = document.getElementById('orderNote').value.trim();
+            
+            if (!name || !items || !total) {
+                alert('Molim popuni ime, proizvode i cenu!');
+                return;
+            }
+            
+            const order = {
+                id: Date.now(),
+                customer: name,
+                phone: phone,
+                address: address,
+                items: items,
+                total: total,
+                note: note,
+                status: 'new',
+                date: new Date().toISOString()
+            };
+            
+            orders.unshift(order);
+            saveOrders();
+            renderOrders();
+            updateStats();
+            closeModal();
+            
+            alert('✅ Porudžbina sačuvana!');
+        }
+        
+        function saveOrders() {
+            localStorage.setItem('taiss_orders', JSON.stringify(orders));
+        }
+        
+        function nextStatus(id) {
+            const order = orders.find(o => o.id === id);
+            if (order) {
+                const currentIndex = statusFlow.indexOf(order.status);
+                if (currentIndex < statusFlow.length - 1) {
+                    order.status = statusFlow[currentIndex + 1];
+                    saveOrders();
+                    renderOrders();
+                    updateStats();
+                }
+            }
+        }
+        
+        function deleteOrder(id) {
+            if (confirm('Da li želiš da obrišeš ovu porudžbinu?')) {
+                orders = orders.filter(o => o.id !== id);
+                saveOrders();
+                renderOrders();
+                updateStats();
+            }
+        }
+        
+        function setFilter(filter) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            renderOrders();
+        }
+        
+        function renderOrders() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            let filtered = orders;
+            
+            // Apply filter
+            if (currentFilter !== 'all') {
+                filtered = filtered.filter(o => o.status === currentFilter);
+            }
+            
+            // Apply search
+            if (search) {
+                filtered = filtered.filter(o => 
+                    o.customer.toLowerCase().includes(search) ||
+                    o.items.toLowerCase().includes(search)
+                );
+            }
+            
+            const list = document.getElementById('ordersList');
+            document.getElementById('ordersCount').textContent = '(' + filtered.length + ')';
+            
+            if (filtered.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-emoji">📦</div>
+                        <div class="empty-state-text">${search || currentFilter !== 'all' ? 'Nema rezultata.' : 'Nema porudžbina.<br>Klikni + da dodaš prvu!'}</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            list.innerHTML = filtered.map(order => {
+                const date = new Date(order.date);
+                const dateStr = date.toLocaleDateString('sr-RS', { day: 'numeric', month: 'short', year: 'numeric' });
+                const isLast = order.status === 'done';
+                
+                return `
+                    <div class="order-card ${order.status}">
+                        <div class="order-header">
+                            <div>
+                                <div class="order-customer">${order.customer}</div>
+                                <div class="order-date">📅 ${dateStr}${order.phone ? ' • 📞 ' + order.phone : ''}</div>
+                            </div>
+                            <div class="order-total">${order.total.toLocaleString('sr')} RSD</div>
+                        </div>
+                        <div class="order-items">📦 ${order.items}${order.note ? '<br>📝 ' + order.note : ''}</div>
+                        <div class="order-footer">
+                            <span class="order-status ${order.status}">${statusLabels[order.status]}</span>
+                            <div class="order-actions">
+                                ${!isLast ? `<button class="action-btn next" onclick="nextStatus(${order.id})" title="Sledeći status">→</button>` : ''}
+                                <button class="action-btn delete" onclick="deleteOrder(${order.id})" title="Obriši">🗑️</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function updateStats() {
+            const stats = {
+                new: 0,
+                working: 0,
+                sent: 0,
+                done: 0
+            };
+            
+            const now = new Date();
+            const currentMonth = now.getMonth();
+            const currentYear = now.getFullYear();
+            let monthlyOrders = 0;
+            let monthlyRevenue = 0;
+            
+            orders.forEach(order => {
+                stats[order.status]++;
+                
+                const orderDate = new Date(order.date);
+                if (orderDate.getMonth() === currentMonth && orderDate.getFullYear() === currentYear) {
+                    monthlyOrders++;
+                    monthlyRevenue += order.total;
+                }
+            });
+            
+            document.getElementById('statNew').textContent = stats.new;
+            document.getElementById('statWorking').textContent = stats.working;
+            document.getElementById('statSent').textContent = stats.sent;
+            document.getElementById('statDone').textContent = stats.done;
+            
+            document.getElementById('monthlyOrders').textContent = monthlyOrders;
+            document.getElementById('monthlyRevenue').textContent = monthlyRevenue.toLocaleString('sr') + ' RSD';
+        }
+        
+        // Initialize
+        renderOrders();
+        updateStats();
+    </script>
+</body>
+</html>

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Čestitka za štampu - TAISS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .no-print {
+            max-width: 600px;
+            margin: 0 auto 30px;
+            text-align: center;
+        }
+        
+        .no-print h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2rem;
+            color: #3d3225;
+            margin-bottom: 10px;
+        }
+        
+        .no-print p {
+            color: #888;
+            margin-bottom: 20px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #5c4a3a 0%, #3d3225 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
+            margin: 5px;
+        }
+        
+        .btn:hover {
+            opacity: 0.9;
+        }
+        
+        /* ČESTITKA ZA ŠTAMPU */
+        .print-area {
+            width: 148mm; /* A5 širina */
+            height: 210mm; /* A5 visina */
+            margin: 0 auto;
+            background: linear-gradient(145deg, #faf8f5 0%, #f5f0eb 50%, #ebe5dd 100%);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            position: relative;
+        }
+        
+        /* Prednja strana */
+        .card-front {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Dekorativni elementi */
+        .decoration-top {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 14px;
+            color: #b8956e;
+            letter-spacing: 0.3em;
+        }
+        
+        .stars {
+            color: #d4c4a8;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        
+        .main-emoji {
+            font-size: 80px;
+            margin-bottom: 25px;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
+        }
+        
+        .card-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.2rem;
+            color: #3d3225;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .card-subtitle {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.4rem;
+            color: #b8956e;
+            font-style: italic;
+            margin-bottom: 35px;
+        }
+        
+        .qr-container {
+            background: white;
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+        }
+        
+        .qr-container img {
+            width: 140px;
+            height: 140px;
+            display: block;
+        }
+        
+        .scan-text {
+            font-size: 11px;
+            color: #888;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        
+        .scan-icon {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+        
+        .message-box {
+            background: rgba(184, 149, 110, 0.1);
+            border: 1px solid rgba(184, 149, 110, 0.3);
+            border-radius: 12px;
+            padding: 20px 30px;
+            margin-bottom: 25px;
+        }
+        
+        .message-text {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.3rem;
+            color: #3d3225;
+            font-style: italic;
+            line-height: 1.6;
+        }
+        
+        .brand {
+            font-size: 16px;
+            letter-spacing: 0.4em;
+            color: #3d3225;
+            font-weight: 500;
+        }
+        
+        .brand-tagline {
+            font-size: 9px;
+            color: #b8956e;
+            letter-spacing: 0.2em;
+            margin-top: 5px;
+        }
+        
+        .decoration-bottom {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #d4c4a8;
+        }
+        
+        .corner {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-color: #d4c4a8;
+            border-style: solid;
+            border-width: 0;
+        }
+        
+        .corner-tl {
+            top: 25px;
+            left: 25px;
+            border-top-width: 2px;
+            border-left-width: 2px;
+        }
+        
+        .corner-tr {
+            top: 25px;
+            right: 25px;
+            border-top-width: 2px;
+            border-right-width: 2px;
+        }
+        
+        .corner-bl {
+            bottom: 25px;
+            left: 25px;
+            border-bottom-width: 2px;
+            border-left-width: 2px;
+        }
+        
+        .corner-br {
+            bottom: 25px;
+            right: 25px;
+            border-bottom-width: 2px;
+            border-right-width: 2px;
+        }
+        
+        /* Print styles */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .no-print {
+                display: none !important;
+            }
+            
+            .print-area {
+                box-shadow: none;
+                margin: 0;
+                width: 148mm;
+                height: 210mm;
+                page-break-after: always;
+            }
+        }
+        
+        @page {
+            size: A5;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Dugmad - ne štampa se -->
+    <div class="no-print">
+        <h1>🎁 Čestitka za Secret Santa</h1>
+        <p>Odštampaj na A5 papiru i stavi u kovertu</p>
+        <button class="btn" onclick="window.print()">🖨️ Štampaj čestitku</button>
+    </div>
+    
+    <!-- ČESTITKA ZA ŠTAMPU -->
+    <div class="print-area">
+        <div class="card-front">
+            <!-- Uglovi -->
+            <div class="corner corner-tl"></div>
+            <div class="corner corner-tr"></div>
+            <div class="corner corner-bl"></div>
+            <div class="corner corner-br"></div>
+            
+            <!-- Sadržaj -->
+            <div class="decoration-top">✦ ✦ ✦</div>
+            
+            <div class="stars">✨ ❄️ ✨</div>
+            
+            <div class="main-emoji">🎁</div>
+            
+            <h1 class="card-title">Srećna Nova Godina!</h1>
+            <p class="card-subtitle">2026</p>
+            
+            <div class="message-box">
+                <p class="message-text">Imaš poklon koji čeka na tebe...</p>
+            </div>
+            
+            <p class="scan-text">Skeniraj QR kod</p>
+            <div class="scan-icon">📱</div>
+            
+            <div class="qr-container">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=https://symphonious-halva-b0474d.netlify.app/poklon.html&color=3d3225" alt="QR Code">
+            </div>
+            
+            <div class="brand">T A I S S</div>
+            <p class="brand-tagline">RUČNO PRAVLJENE SVEĆE</p>
+            
+            <div class="decoration-bottom">❄️ ✦ ❄️</div>
+        </div>
+    </div>
+</body>
+</html>
