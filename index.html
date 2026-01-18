@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TAISS | Premium Sveće od Sojinog Voska</title>
+    <meta name="description" content="TAISS - Luksuzne ručno pravljene sveće od 100% prirodnog sojinog voska.">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{
+            --bg:#faf9f7;--white:#fff;--text:#1a1a1a;--text-light:#666;--text-muted:#999;
+            --gold:#b8956e;--gold-light:#d4c4a8;--gold-dark:#96784d;--green:#25D366;
+            --border:#e8e4df;--shadow:0 2px 15px rgba(0,0,0,0.08);--shadow-lg:0 15px 40px rgba(0,0,0,0.12);
+            --burgundy:#722f37;--rose:#d4a5a5;
+        }
+        html{scroll-behavior:smooth}
+        body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+        
+        /* Navigation */
+        nav{position:fixed;top:0;left:0;right:0;background:rgba(255,255,255,0.98);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);z-index:1000;padding:0.6rem 1rem}
+        .nav-inner{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center}
+        .logo{display:flex;align-items:center;gap:0.5rem;text-decoration:none;color:var(--text)}
+        .logo-circle{width:36px;height:36px;border:2px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:1rem;color:var(--gold);font-weight:600}
+        .logo-text{font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:500;letter-spacing:0.12em}
+        .nav-links{display:flex;gap:2rem;list-style:none}
+        .nav-links a{text-decoration:none;color:var(--text-light);font-size:0.8rem;font-weight:500;transition:color 0.3s}
+        .cart-btn{background:var(--gold);color:white;border:none;padding:0.5rem 0.9rem;border-radius:50px;font-size:0.8rem;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:0.4rem;font-family:inherit;transition:all 0.3s}
+        .cart-btn svg{width:16px;height:16px}
+        .cart-badge{background:var(--text);color:white;font-size:0.65rem;padding:0.1rem 0.4rem;border-radius:10px}
+
+        /* HERO with Carousel */
+        .hero{position:relative;height:100vh;height:100dvh;display:flex;align-items:center;justify-content:center;overflow:hidden}
+        .hero-carousel{position:absolute;inset:0;z-index:1}
+        .hero-slide{position:absolute;inset:0;opacity:0;transition:opacity 1.5s ease-in-out}
+        .hero-slide.active{opacity:1}
+        .hero-slide img{width:100%;height:100%;object-fit:cover}
+        .hero-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0.2) 0%,rgba(0,0,0,0.4) 50%,rgba(0,0,0,0.6) 100%);z-index:2}
+        
+        .hero-content{position:relative;z-index:3;text-align:center;padding:1.5rem;max-width:600px;color:white;margin-top:40px}
+        .hero-badge{display:inline-block;background:rgba(255,255,255,0.15);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.25);padding:0.4rem 1rem;border-radius:50px;font-size:0.65rem;color:white;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:1.2rem}
+        .hero-title{font-family:'Cormorant Garamond',serif;font-size:2.5rem;font-weight:300;line-height:1.1;margin-bottom:0.8rem;text-shadow:0 2px 15px rgba(0,0,0,0.3)}
+        .hero-title span{display:block;font-style:italic;color:var(--gold-light);font-size:1.8rem}
+        .hero-tagline{font-size:0.9rem;font-weight:300;color:rgba(255,255,255,0.9);margin-bottom:1.5rem;letter-spacing:0.03em}
+        .hero-features{display:flex;justify-content:center;gap:1.2rem;flex-wrap:wrap;margin-bottom:1.8rem}
+        .hero-feature{display:flex;align-items:center;gap:0.3rem;font-size:0.7rem;color:rgba(255,255,255,0.85)}
+        .hero-feature svg{width:14px;height:14px;stroke:var(--gold-light)}
+        .hero-btns{display:flex;gap:0.8rem;justify-content:center;flex-wrap:wrap}
+        .btn{display:inline-flex;align-items:center;gap:0.4rem;padding:0.8rem 1.8rem;font-size:0.8rem;font-weight:500;text-decoration:none;border-radius:50px;transition:all 0.3s;font-family:inherit;cursor:pointer;border:none}
+        .btn-primary{background:var(--gold);color:white}
+        .btn-primary:hover{background:var(--gold-dark)}
+        .btn-outline{background:transparent;color:white;border:1.5px solid rgba(255,255,255,0.5)}
+        .hero-indicators{position:absolute;bottom:1.5rem;left:50%;transform:translateX(-50%);z-index:4;display:flex;gap:0.6rem}
+        .indicator{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,0.4);cursor:pointer;transition:all 0.3s;border:none}
+        .indicator.active{background:var(--gold);transform:scale(1.2)}
+
+        /* Featured Section */
+        .featured{padding:4rem 1.5rem;background:linear-gradient(180deg,var(--white) 0%,#f9f6f3 100%)}
+        .featured-inner{max-width:1200px;margin:0 auto}
+        .featured-header{text-align:center;margin-bottom:2rem}
+        .featured-badge{display:inline-block;background:linear-gradient(135deg,var(--burgundy),var(--rose));color:white;padding:0.35rem 1rem;border-radius:50px;font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:0.8rem}
+        .section-title{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:300}
+        .featured-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+        .featured-card{background:var(--white);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);transition:all 0.4s;position:relative}
+        .featured-card:hover{transform:translateY(-8px);box-shadow:var(--shadow-lg)}
+        .featured-card::before{content:'NOVO';position:absolute;top:0.8rem;right:0.8rem;background:var(--burgundy);color:white;padding:0.25rem 0.6rem;border-radius:4px;font-size:0.55rem;font-weight:600;letter-spacing:0.08em;z-index:2}
+        .featured-image{aspect-ratio:3/4;overflow:hidden}
+        .featured-image img{width:100%;height:100%;object-fit:cover;transition:transform 0.6s}
+        .featured-card:hover .featured-image img{transform:scale(1.08)}
+        .featured-info{padding:1.2rem;text-align:center}
+        .featured-name{font-family:'Cormorant Garamond',serif;font-size:1.2rem;margin-bottom:0.4rem}
+        .featured-price{font-size:1rem;font-weight:600;color:var(--gold-dark);margin-bottom:0.8rem}
+        .featured-btn{width:100%;padding:0.75rem;background:linear-gradient(135deg,var(--gold),var(--gold-dark));border:none;color:white;font-size:0.7rem;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;border-radius:8px;transition:all 0.3s;font-family:inherit}
+
+        /* Products */
+        .products{padding:4rem 1.5rem;background:var(--bg)}
+        .products-inner{max-width:1200px;margin:0 auto}
+        .products-header{text-align:center;margin-bottom:2rem}
+        .section-label{font-size:0.7rem;color:var(--gold);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:0.8rem;display:flex;align-items:center;justify-content:center;gap:0.6rem}
+        .section-label::before,.section-label::after{content:'';width:25px;height:1px;background:var(--gold-light)}
+        .products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.2rem}
+        .product-card{background:var(--white);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);transition:all 0.4s}
+        .product-card:hover{transform:translateY(-6px);box-shadow:var(--shadow-lg)}
+        .product-image{position:relative;aspect-ratio:1;overflow:hidden;background:#f5f5f5}
+        .product-image img{width:100%;height:100%;object-fit:cover;transition:transform 0.5s}
+        .product-card:hover .product-image img{transform:scale(1.08)}
+        .product-badge{position:absolute;top:0.8rem;left:0.8rem;background:var(--gold);color:white;padding:0.25rem 0.6rem;border-radius:4px;font-size:0.6rem;font-weight:600;text-transform:uppercase}
+        .product-badge.new{background:#3d6b4f}.product-badge.limited{background:#8b4557}
+        .product-info{padding:1rem}
+        .product-category{font-size:0.6rem;color:var(--gold);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.4rem}
+        .product-name{font-family:'Cormorant Garamond',serif;font-size:1.1rem;margin-bottom:0.4rem}
+        .product-desc{font-size:0.75rem;color:var(--text-muted);margin-bottom:0.8rem}
+        .product-footer{display:flex;justify-content:space-between;align-items:center;padding-top:0.8rem;border-top:1px solid var(--border)}
+        .product-price{font-weight:600;color:var(--gold-dark);font-size:1rem}
+        .product-price span{font-size:0.75rem;font-weight:400;color:var(--text-muted)}
+        .add-btn{padding:0.5rem 1rem;background:var(--bg);border:none;font-size:0.7rem;font-weight:500;color:var(--text);cursor:pointer;border-radius:4px;transition:all 0.3s;font-family:inherit;text-transform:uppercase}
+        .add-btn:hover{background:var(--gold);color:white}
+
+        /* Loading */
+        .loading{text-align:center;padding:3rem;color:var(--text-muted)}
+        .loading-spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 1rem}
+        @keyframes spin{to{transform:rotate(360deg)}}
+
+        /* Features Strip */
+        .features-strip{background:var(--text);padding:2.5rem 1.5rem}
+        .features-inner{max-width:1000px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem}
+        .feature-item{text-align:center;color:white}
+        .feature-icon{width:44px;height:44px;margin:0 auto 0.8rem;border:1px solid rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center}
+        .feature-icon svg{width:20px;height:20px;stroke:var(--gold-light)}
+        .feature-item h4{font-size:0.8rem;margin-bottom:0.2rem}
+        .feature-item p{font-size:0.65rem;opacity:0.6}
+
+        /* Contact */
+        .contact{padding:4rem 1.5rem;background:var(--white);text-align:center}
+        .contact-inner{max-width:400px;margin:0 auto}
+        .contact h2{font-family:'Cormorant Garamond',serif;font-size:1.6rem;margin-bottom:0.4rem}
+        .contact>p{color:var(--text-light);margin-bottom:1.5rem;font-size:0.9rem}
+        .contact-btns{display:flex;flex-direction:column;gap:0.6rem}
+        .contact-btn{display:flex;align-items:center;justify-content:center;gap:0.6rem;padding:0.9rem;border-radius:10px;text-decoration:none;font-weight:500;color:white;transition:all 0.3s;font-size:0.9rem}
+        .contact-btn svg{width:22px;height:22px}
+        .contact-btn.whatsapp{background:#25D366}
+        .contact-btn.instagram{background:linear-gradient(45deg,#f09433,#dc2743,#bc1888)}
+
+        footer{background:var(--bg);padding:2.5rem 1.5rem;border-top:1px solid var(--border);text-align:center}
+        .footer-logo{font-family:'Cormorant Garamond',serif;font-size:1.3rem;letter-spacing:0.12em;margin-bottom:0.4rem}
+        footer p{font-size:0.7rem;color:var(--text-muted)}
+
+        /* Cart Modal */
+        .cart-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:2000;opacity:0;visibility:hidden;transition:all 0.3s}
+        .cart-overlay.open{opacity:1;visibility:visible}
+        .cart-modal{position:fixed;top:0;bottom:0;right:0;width:100%;max-width:420px;background:var(--white);z-index:2001;transform:translateX(100%);transition:transform 0.4s;display:flex;flex-direction:column}
+        .cart-modal.open{transform:translateX(0)}
+        .cart-header{padding:1rem 1.2rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;background:var(--white)}
+        .cart-header h3{font-family:'Cormorant Garamond',serif;font-size:1.2rem}
+        .close-btn{width:32px;height:32px;border-radius:50%;border:none;background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center}
+        .close-btn svg{width:16px;height:16px}
+        .cart-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+        .cart-items{padding:1rem 1.2rem}
+        .cart-empty{text-align:center;padding:2.5rem 1rem;color:var(--text-muted)}
+        .cart-empty svg{width:50px;height:50px;stroke:var(--border);margin-bottom:0.8rem}
+        .cart-empty p{font-size:0.9rem}
+        .cart-item{display:flex;gap:0.8rem;padding:0.8rem 0;border-bottom:1px solid var(--border)}
+        .cart-item-img{width:70px;height:70px;border-radius:8px;object-fit:cover;flex-shrink:0}
+        .cart-item-info{flex:1;min-width:0}
+        .cart-item-name{font-weight:500;margin-bottom:0.2rem;font-size:0.9rem}
+        .cart-item-price{color:var(--gold-dark);font-weight:600;font-size:0.85rem}
+        .cart-item-qty{display:flex;align-items:center;gap:0.4rem;margin-top:0.4rem}
+        .qty-btn{width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:var(--white);cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center}
+        .qty-num{font-weight:600;min-width:20px;text-align:center;font-size:0.9rem}
+        .remove-btn{background:none;border:none;cursor:pointer;padding:0.4rem;opacity:0.4;flex-shrink:0}
+        .remove-btn:hover{opacity:1}
+        .remove-btn svg{width:16px;height:16px}
+        
+        .order-form{padding:1rem 1.2rem;border-top:1px solid var(--border)}
+        .form-group{margin-bottom:0.8rem}
+        .form-group label{display:block;font-size:0.7rem;font-weight:500;margin-bottom:0.3rem;color:var(--text-muted)}
+        .form-group input,.form-group textarea{width:100%;padding:0.7rem 0.9rem;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:0.9rem}
+        .form-group input:focus,.form-group textarea:focus{outline:none;border-color:var(--gold)}
+        .form-group textarea{resize:none;height:60px}
+        .form-row{display:grid;grid-template-columns:1fr 1fr;gap:0.8rem}
+        
+        .cart-footer{padding:1rem 1.2rem;border-top:1px solid var(--border);background:var(--bg);flex-shrink:0}
+        .cart-total{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem;padding:0.8rem;background:var(--white);border-radius:8px}
+        .cart-total span:first-child{font-size:0.9rem}
+        .cart-total span:last-child{font-family:'Cormorant Garamond',serif;font-weight:600;color:var(--gold-dark);font-size:1.2rem}
+        .order-btn{width:100%;padding:1rem;background:var(--green);color:white;border:none;border-radius:10px;font-size:0.95rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.5rem;font-family:inherit}
+        .order-btn svg{width:20px;height:20px}
+        
+        .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--text);color:white;padding:0.8rem 1.5rem;border-radius:50px;font-size:0.85rem;font-weight:500;z-index:3000;opacity:0;transition:all 0.3s}
+        .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+        /* Responsive */
+        @media(min-width:1024px){
+            .hero-title{font-size:4rem}
+            .hero-title span{font-size:2.5rem}
+            .hero-badge{font-size:0.75rem;padding:0.5rem 1.5rem}
+            .hero-tagline{font-size:1.1rem}
+            .hero-feature{font-size:0.85rem}
+            .hero-feature svg{width:18px;height:18px}
+        }
+        @media(max-width:900px){
+            .featured-grid{grid-template-columns:repeat(2,1fr)}
+        }
+        @media(max-width:768px){
+            nav{padding:0.5rem 0.8rem}
+            .nav-links{display:none}
+            .cart-btn span:not(.cart-badge){display:none}
+            .cart-btn{padding:0.5rem;border-radius:50%}
+            .hero-content{margin-top:50px}
+            .featured-grid{grid-template-columns:1fr}
+            .featured-card::before{font-size:0.5rem;padding:0.2rem 0.5rem}
+            .features-inner{grid-template-columns:repeat(2,1fr);gap:1rem}
+            .feature-item h4{font-size:0.75rem}
+            .products-grid{grid-template-columns:1fr}
+        }
+        @media(max-width:400px){
+            .hero-title{font-size:2.2rem}
+            .hero-title span{font-size:1.5rem}
+            .hero-badge{font-size:0.55rem;padding:0.3rem 0.8rem}
+            .hero-features{gap:0.8rem}
+            .hero-feature{font-size:0.6rem}
+            .btn{padding:0.7rem 1.4rem;font-size:0.75rem}
+        }
+    </style>
+</head>
+<body>
+    <nav><div class="nav-inner">
+        <a href="#" class="logo"><div class="logo-circle">T</div><span class="logo-text">TAISS</span></a>
+        <ul class="nav-links"><li><a href="#featured">Novo</a></li><li><a href="#proizvodi">Proizvodi</a></li><li><a href="#kontakt">Kontakt</a></li></ul>
+        <button class="cart-btn" onclick="openCart()"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg><span>Korpa</span><span class="cart-badge" id="cartBadge">0</span></button>
+    </div></nav>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="hero-carousel">
+            <div class="hero-slide active"><img src="img11.jpg" alt="TAISS Buket Bordo"></div>
+            <div class="hero-slide"><img src="img12.jpg" alt="TAISS Buket Roze"></div>
+            <div class="hero-slide"><img src="img13.jpg" alt="TAISS Buket Bež"></div>
+        </div>
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <div class="hero-badge">✦ Premium Handcrafted in Serbia</div>
+            <h1 class="hero-title">TAISS<span>Luxury Candles</span></h1>
+            <p class="hero-tagline">Luksuzne sveće od 100% prirodnog sojinog voska</p>
+            <div class="hero-features">
+                <div class="hero-feature"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>Sojin Vosak</div>
+                <div class="hero-feature"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42"/></svg>Ručna Izrada</div>
+                <div class="hero-feature"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"/></svg>Premium Mirisi</div>
+            </div>
+            <div class="hero-btns">
+                <a href="#featured" class="btn btn-primary">Pogledaj Kolekciju</a>
+                <a href="https://wa.me/381607000158" class="btn btn-outline">Kontakt</a>
+            </div>
+        </div>
+        <div class="hero-indicators">
+            <button class="indicator active" onclick="goToSlide(0)"></button>
+            <button class="indicator" onclick="goToSlide(1)"></button>
+            <button class="indicator" onclick="goToSlide(2)"></button>
+        </div>
+    </section>
+
+    <!-- Featured -->
+    <section class="featured" id="featured">
+        <div class="featured-inner">
+            <div class="featured-header"><span class="featured-badge">✨ Nova Kolekcija 2026</span><h2 class="section-title">Izdvojeni Proizvodi</h2></div>
+            <div class="featured-grid" id="featuredGrid">
+                <div class="loading"><div class="loading-spinner"></div><p>Učitavanje...</p></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products -->
+    <section class="products" id="proizvodi">
+        <div class="products-inner">
+            <div class="products-header"><div class="section-label">Kolekcija</div><h2 class="section-title">Svi Proizvodi</h2></div>
+            <div class="products-grid" id="productsGrid">
+                <div class="loading"><div class="loading-spinner"></div><p>Učitavanje...</p></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features-strip"><div class="features-inner">
+        <div class="feature-item"><div class="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12"/></svg></div><h4>Brza Dostava</h4><p>2-3 radna dana</p></div>
+        <div class="feature-item"><div class="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/></svg></div><h4>Plaćanje Pouzećem</h4><p>Bez rizika</p></div>
+        <div class="feature-item"><div class="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><h4>Garancija Kvaliteta</h4><p>Premium materijali</p></div>
+        <div class="feature-item"><div class="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"/></svg></div><h4>Ručna Izrada</h4><p>Svaki komad unikat</p></div>
+    </div></section>
+
+    <!-- Contact -->
+    <section class="contact" id="kontakt"><div class="contact-inner">
+        <div class="section-label">Kontakt</div>
+        <h2>Imate pitanja? 💬</h2><p>Javite nam se!</p>
+        <div class="contact-btns">
+            <a href="https://wa.me/381607000158" target="_blank" class="contact-btn whatsapp"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>WhatsApp</a>
+            <a href="https://instagram.com/taiss.rs" target="_blank" class="contact-btn instagram"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>Instagram</a>
+        </div>
+    </div></section>
+
+    <footer><div class="footer-logo">TAISS</div><p>Aroma Candles & More</p><p style="margin-top:0.8rem">© 2026 TAISS. Sva prava zadržana.</p></footer>
+
+    <!-- Cart Modal -->
+    <div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
+    <div class="cart-modal" id="cartModal">
+        <div class="cart-header">
+            <h3>🛒 Vaša Korpa</h3>
+            <button class="close-btn" onclick="closeCart()"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
+        </div>
+        <div class="cart-body">
+            <div class="cart-items" id="cartItems">
+                <div class="cart-empty"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg><p>Korpa je prazna</p></div>
+            </div>
+            <div class="order-form" id="orderForm" style="display:none">
+                <div class="form-group"><label>Ime i prezime *</label><input type="text" id="customerName" placeholder="Vaše ime"></div>
+                <div class="form-row"><div class="form-group"><label>Telefon *</label><input type="tel" id="customerPhone" placeholder="06X XXX XXXX"></div><div class="form-group"><label>Grad *</label><input type="text" id="customerCity" placeholder="Beograd"></div></div>
+                <div class="form-group"><label>Adresa *</label><input type="text" id="customerAddress" placeholder="Ulica i broj"></div>
+                <div class="form-group"><label>Napomena</label><textarea id="customerNote" placeholder="Npr. pozovite pre dostave..."></textarea></div>
+            </div>
+        </div>
+        <div class="cart-footer" id="cartFooter" style="display:none">
+            <div class="cart-total"><span>Ukupno:</span><span id="cartTotal">0 RSD</span></div>
+            <button class="order-btn" onclick="sendOrder()"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>Naruči preko WhatsApp</button>
+        </div>
+    </div>
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ============ SUPABASE CONFIG ============
+        const SUPABASE_URL = 'https://fwddgazfzxjcwwwonnxq.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ3ZGRnYXpmenhqY3d3d29ubnhxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3Mzc1NzMsImV4cCI6MjA4NDMxMzU3M30.KfmCsYFoJqcrlupkcDLU-OP7oa7q_hWqHSUvf2Hyv8U';
+        const WHATSAPP_NUMBER = '381607000158';
+
+        // Supabase fetch helper
+        async function supabaseFetch(table, query = '') {
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}${query}`, {
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            return response.json();
+        }
+
+        // Global products array
+        let allProducts = [];
+
+        // Load products from Supabase
+        async function loadProducts() {
+            try {
+                // Fetch all active products with categories
+                const products = await supabaseFetch('products', '?is_active=eq.true&order=sort_order.asc');
+                const categories = await supabaseFetch('categories');
+                
+                // Create category map
+                const categoryMap = {};
+                categories.forEach(c => categoryMap[c.id] = c.name);
+                
+                // Add category names to products
+                allProducts = products.map(p => ({
+                    ...p,
+                    category_name: categoryMap[p.category_id] || 'Sveće'
+                }));
+                
+                renderFeatured();
+                renderProducts();
+            } catch (error) {
+                console.error('Error loading products:', error);
+                document.getElementById('featuredGrid').innerHTML = '<p style="text-align:center;color:#999;">Greška pri učitavanju</p>';
+                document.getElementById('productsGrid').innerHTML = '<p style="text-align:center;color:#999;">Greška pri učitavanju</p>';
+            }
+        }
+
+        // Carousel
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.hero-slide');
+        const indicators = document.querySelectorAll('.indicator');
+        function goToSlide(n) {
+            slides[currentSlide].classList.remove('active');
+            indicators[currentSlide].classList.remove('active');
+            currentSlide = n;
+            slides[currentSlide].classList.add('active');
+            indicators[currentSlide].classList.add('active');
+        }
+        function nextSlide() { goToSlide((currentSlide + 1) % slides.length); }
+        setInterval(nextSlide, 4000);
+
+        // Render Featured Products (is_featured = true)
+        function renderFeatured() {
+            const featured = allProducts.filter(p => p.is_featured);
+            if (featured.length === 0) {
+                document.getElementById('featuredGrid').innerHTML = '<p style="text-align:center;color:#999;">Nema izdvojenih proizvoda</p>';
+                return;
+            }
+            document.getElementById('featuredGrid').innerHTML = featured.slice(0, 6).map(p => `
+                <div class="featured-card">
+                    <div class="featured-image">
+                        <img src="${p.image_url}" alt="${p.name}" onerror="this.src='img1.jpg'">
+                    </div>
+                    <div class="featured-info">
+                        <h3 class="featured-name">${p.name}</h3>
+                        <div class="featured-price">${p.price.toLocaleString('sr')} RSD</div>
+                        <button class="featured-btn" onclick="addToCart(${p.id})">Dodaj u korpu</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Render All Products
+        function renderProducts() {
+            if (allProducts.length === 0) {
+                document.getElementById('productsGrid').innerHTML = '<p style="text-align:center;color:#999;">Nema proizvoda</p>';
+                return;
+            }
+            document.getElementById('productsGrid').innerHTML = allProducts.map(p => `
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="${p.image_url}" alt="${p.name}" onerror="this.src='img1.jpg'">
+                        ${p.badge ? `<span class="product-badge ${p.badge === 'Novo' ? 'new' : p.badge === 'Limitirano' ? 'limited' : ''}">${p.badge}</span>` : ''}
+                    </div>
+                    <div class="product-info">
+                        <div class="product-category">${p.category_name}</div>
+                        <h3 class="product-name">${p.name}</h3>
+                        <p class="product-desc">${p.description || ''}</p>
+                        <div class="product-footer">
+                            <span class="product-price">${p.price.toLocaleString('sr')} <span>RSD</span></span>
+                            <button class="add-btn" onclick="addToCart(${p.id})">Dodaj</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Cart functionality
+        let cart = JSON.parse(localStorage.getItem('taiss_cart')) || [];
+
+        function addToCart(id) {
+            const p = allProducts.find(x => x.id === id);
+            if (!p) return;
+            
+            const existing = cart.find(x => x.id === id);
+            if (existing) {
+                existing.qty++;
+            } else {
+                cart.push({
+                    id: p.id,
+                    name: p.name,
+                    price: p.price,
+                    image: p.image_url,
+                    qty: 1
+                });
+            }
+            saveCart();
+            updateCartUI();
+            showToast(p.name + ' dodat! ✓');
+        }
+
+        function updateQty(id, d) {
+            const item = cart.find(x => x.id === id);
+            if (item) {
+                item.qty += d;
+                if (item.qty <= 0) {
+                    cart = cart.filter(x => x.id !== id);
+                }
+                saveCart();
+                updateCartUI();
+            }
+        }
+
+        function removeFromCart(id) {
+            cart = cart.filter(x => x.id !== id);
+            saveCart();
+            updateCartUI();
+        }
+
+        function saveCart() {
+            localStorage.setItem('taiss_cart', JSON.stringify(cart));
+        }
+
+        function updateCartUI() {
+            const totalItems = cart.reduce((s, i) => s + i.qty, 0);
+            const totalPrice = cart.reduce((s, i) => s + (i.price * i.qty), 0);
+            document.getElementById('cartBadge').textContent = totalItems;
+            document.getElementById('cartTotal').textContent = totalPrice.toLocaleString('sr') + ' RSD';
+            
+            const cartItemsEl = document.getElementById('cartItems');
+            const footerEl = document.getElementById('cartFooter');
+            const formEl = document.getElementById('orderForm');
+            
+            if (cart.length === 0) {
+                cartItemsEl.innerHTML = '<div class="cart-empty"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg><p>Korpa je prazna</p></div>';
+                footerEl.style.display = 'none';
+                formEl.style.display = 'none';
+            } else {
+                cartItemsEl.innerHTML = cart.map(i => `
+                    <div class="cart-item">
+                        <img src="${i.image}" alt="${i.name}" class="cart-item-img" onerror="this.src='img1.jpg'">
+                        <div class="cart-item-info">
+                            <div class="cart-item-name">${i.name}</div>
+                            <div class="cart-item-price">${i.price.toLocaleString('sr')} RSD</div>
+                            <div class="cart-item-qty">
+                                <button class="qty-btn" onclick="updateQty(${i.id},-1)">−</button>
+                                <span class="qty-num">${i.qty}</span>
+                                <button class="qty-btn" onclick="updateQty(${i.id},1)">+</button>
+                            </div>
+                        </div>
+                        <button class="remove-btn" onclick="removeFromCart(${i.id})">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+                `).join('');
+                footerEl.style.display = 'block';
+                formEl.style.display = 'block';
+            }
+        }
+
+        function openCart() {
+            document.getElementById('cartModal').classList.add('open');
+            document.getElementById('cartOverlay').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeCart() {
+            document.getElementById('cartModal').classList.remove('open');
+            document.getElementById('cartOverlay').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        function sendOrder() {
+            const name = document.getElementById('customerName').value.trim();
+            const phone = document.getElementById('customerPhone').value.trim();
+            const city = document.getElementById('customerCity').value.trim();
+            const address = document.getElementById('customerAddress').value.trim();
+            const note = document.getElementById('customerNote').value.trim();
+            
+            if (!name || !phone || !city || !address) {
+                showToast('Popunite sva polja! ⚠️');
+                return;
+            }
+            
+            const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
+            let msg = '🕯️ *NOVA NARUDŽBINA - TAISS*\n\n';
+            msg += '👤 ' + name + '\n';
+            msg += '📱 ' + phone + '\n';
+            msg += '🏙️ ' + city + '\n';
+            msg += '📍 ' + address + '\n';
+            if (note) msg += '📝 ' + note + '\n';
+            msg += '\n━━━━━━━━━━━━━━━\n🛒 *PROIZVODI:*\n';
+            cart.forEach(i => {
+                msg += '• ' + i.name + ' x' + i.qty + ' = ' + (i.price * i.qty).toLocaleString('sr') + ' RSD\n';
+            });
+            msg += '\n💰 *UKUPNO: ' + total.toLocaleString('sr') + ' RSD*\n💳 Plaćanje pouzećem';
+            
+            window.open('https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(msg), '_blank');
+            
+            cart = [];
+            saveCart();
+            updateCartUI();
+            closeCart();
+            showToast('Narudžbina poslata! 🎉');
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // Initialize
+        loadProducts();
+        updateCartUI();
+    </script>
+</body>
+</html>
