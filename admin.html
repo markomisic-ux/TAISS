@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TAISS Admin Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #b8956e;
+            --primary-dark: #96784d;
+            --bg: #f5f5f7;
+            --white: #fff;
+            --text: #1d1d1f;
+            --text-light: #86868b;
+            --border: #e5e5e7;
+            --success: #34c759;
+            --danger: #ff3b30;
+            --warning: #ff9500;
+        }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); }
+        
+        /* Sidebar */
+        .sidebar {
+            position: fixed; left: 0; top: 0; bottom: 0; width: 240px;
+            background: var(--white); border-right: 1px solid var(--border);
+            padding: 1.5rem; display: flex; flex-direction: column;
+        }
+        .sidebar-logo { font-size: 1.5rem; font-weight: 700; color: var(--primary); margin-bottom: 2rem; }
+        .sidebar-nav { list-style: none; flex: 1; }
+        .sidebar-nav li { margin-bottom: 0.5rem; }
+        .sidebar-nav a {
+            display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem;
+            text-decoration: none; color: var(--text-light); border-radius: 8px;
+            transition: all 0.2s; font-size: 0.9rem; font-weight: 500;
+        }
+        .sidebar-nav a:hover, .sidebar-nav a.active { background: var(--bg); color: var(--text); }
+        .sidebar-nav a.active { color: var(--primary); }
+        .sidebar-nav svg { width: 20px; height: 20px; }
+        
+        /* Main Content */
+        .main { margin-left: 240px; padding: 2rem; min-height: 100vh; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+        .header h1 { font-size: 1.75rem; font-weight: 600; }
+        
+        /* Cards */
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 2rem; }
+        .stat-card {
+            background: var(--white); border-radius: 12px; padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .stat-card-label { font-size: 0.8rem; color: var(--text-light); margin-bottom: 0.5rem; }
+        .stat-card-value { font-size: 2rem; font-weight: 700; color: var(--text); }
+        .stat-card-change { font-size: 0.75rem; margin-top: 0.5rem; }
+        .stat-card-change.up { color: var(--success); }
+        .stat-card-change.down { color: var(--danger); }
+        
+        /* Tables */
+        .card {
+            background: var(--white); border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05); overflow: hidden;
+        }
+        .card-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border);
+        }
+        .card-header h2 { font-size: 1.1rem; font-weight: 600; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 1rem 1.5rem; text-align: left; border-bottom: 1px solid var(--border); }
+        th { font-size: 0.75rem; font-weight: 600; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.05em; }
+        td { font-size: 0.9rem; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover { background: var(--bg); }
+        
+        /* Buttons */
+        .btn {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            padding: 0.6rem 1.2rem; border-radius: 8px; font-size: 0.85rem;
+            font-weight: 500; cursor: pointer; transition: all 0.2s;
+            border: none; font-family: inherit;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-secondary { background: var(--bg); color: var(--text); }
+        .btn-secondary:hover { background: var(--border); }
+        .btn-danger { background: #fee; color: var(--danger); }
+        .btn-danger:hover { background: var(--danger); color: white; }
+        .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.8rem; }
+        .btn svg { width: 16px; height: 16px; }
+        
+        /* Badge */
+        .badge {
+            display: inline-block; padding: 0.25rem 0.6rem; border-radius: 50px;
+            font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
+        }
+        .badge-success { background: #e8f8ed; color: var(--success); }
+        .badge-warning { background: #fff4e5; color: var(--warning); }
+        .badge-danger { background: #fee; color: var(--danger); }
+        .badge-info { background: #e5f1ff; color: #007aff; }
+        
+        /* Modal */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+            display: none; align-items: center; justify-content: center; z-index: 1000;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal {
+            background: var(--white); border-radius: 16px; width: 100%; max-width: 500px;
+            max-height: 90vh; overflow-y: auto;
+        }
+        .modal-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border);
+        }
+        .modal-header h3 { font-size: 1.1rem; font-weight: 600; }
+        .modal-close { background: none; border: none; cursor: pointer; padding: 0.5rem; }
+        .modal-body { padding: 1.5rem; }
+        .modal-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--border); display: flex; gap: 0.75rem; justify-content: flex-end; }
+        
+        /* Forms */
+        .form-group { margin-bottom: 1.25rem; }
+        .form-group label { display: block; font-size: 0.8rem; font-weight: 500; margin-bottom: 0.5rem; color: var(--text-light); }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--border);
+            border-radius: 8px; font-size: 0.9rem; font-family: inherit;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none; border-color: var(--primary);
+        }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        
+        /* Image preview */
+        .image-preview {
+            width: 100%; height: 150px; border: 2px dashed var(--border); border-radius: 8px;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+            overflow: hidden; background: var(--bg);
+        }
+        .image-preview img { width: 100%; height: 100%; object-fit: cover; }
+        .image-preview span { color: var(--text-light); font-size: 0.85rem; }
+        
+        /* Product image in table */
+        .product-img { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; }
+        
+        /* Tabs */
+        .tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
+        .tab {
+            padding: 0.6rem 1.2rem; border-radius: 8px; font-size: 0.85rem;
+            font-weight: 500; cursor: pointer; background: transparent; border: none;
+            color: var(--text-light); font-family: inherit;
+        }
+        .tab.active { background: var(--white); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        
+        /* Page sections */
+        .page { display: none; }
+        .page.active { display: block; }
+        
+        /* Toast */
+        .toast {
+            position: fixed; bottom: 2rem; right: 2rem; background: var(--text);
+            color: white; padding: 1rem 1.5rem; border-radius: 10px; font-size: 0.9rem;
+            opacity: 0; transform: translateY(20px); transition: all 0.3s; z-index: 2000;
+        }
+        .toast.show { opacity: 1; transform: translateY(0); }
+        
+        /* Loading */
+        .loading { text-align: center; padding: 3rem; color: var(--text-light); }
+        
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 768px) {
+            .sidebar { width: 70px; padding: 1rem 0.5rem; }
+            .sidebar-logo { font-size: 1rem; text-align: center; }
+            .sidebar-nav a span { display: none; }
+            .sidebar-nav a { justify-content: center; padding: 0.75rem; }
+            .main { margin-left: 70px; padding: 1rem; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .form-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-logo">TAISS</div>
+        <ul class="sidebar-nav">
+            <li><a href="#" class="active" data-page="dashboard">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"/></svg>
+                <span>Dashboard</span>
+            </a></li>
+            <li><a href="#" data-page="products">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"/></svg>
+                <span>Proizvodi</span>
+            </a></li>
+            <li><a href="#" data-page="categories">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z"/><path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z"/></svg>
+                <span>Kategorije</span>
+            </a></li>
+            <li><a href="#" data-page="orders">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>
+                <span>Porudžbine</span>
+            </a></li>
+            <li><a href="#" data-page="customers">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>
+                <span>Kupci</span>
+            </a></li>
+        </ul>
+        <a href="index.html" target="_blank" class="btn btn-secondary" style="margin-top: auto; justify-content: center;">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:16px;height:16px"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
+            <span>Sajt</span>
+        </a>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main">
+        <!-- Dashboard Page -->
+        <div class="page active" id="page-dashboard">
+            <div class="header">
+                <h1>Dashboard</h1>
+                <div style="font-size: 0.9rem; color: var(--text-light);" id="currentDate"></div>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-card-label">Ukupno Proizvoda</div>
+                    <div class="stat-card-value" id="stat-products">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-label">Kategorija</div>
+                    <div class="stat-card-value" id="stat-categories">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-label">Porudžbina</div>
+                    <div class="stat-card-value" id="stat-orders">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-label">Kupaca</div>
+                    <div class="stat-card-value" id="stat-customers">0</div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h2>Poslednje Porudžbine</h2>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Kupac</th>
+                            <th>Iznos</th>
+                            <th>Status</th>
+                            <th>Datum</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recent-orders">
+                        <tr><td colspan="5" class="loading">Učitavanje...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Products Page -->
+        <div class="page" id="page-products">
+            <div class="header">
+                <h1>Proizvodi</h1>
+                <button class="btn btn-primary" onclick="openProductModal()">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                    Dodaj Proizvod
+                </button>
+            </div>
+            
+            <div class="card">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Slika</th>
+                            <th>Naziv</th>
+                            <th>Kategorija</th>
+                            <th>Cena</th>
+                            <th>Status</th>
+                            <th>Akcije</th>
+                        </tr>
+                    </thead>
+                    <tbody id="products-table">
+                        <tr><td colspan="6" class="loading">Učitavanje...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Categories Page -->
+        <div class="page" id="page-categories">
+            <div class="header">
+                <h1>Kategorije</h1>
+                <button class="btn btn-primary" onclick="openCategoryModal()">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                    Dodaj Kategoriju
+                </button>
+            </div>
+            
+            <div class="card">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Naziv</th>
+                            <th>Slug</th>
+                            <th>Broj Proizvoda</th>
+                            <th>Akcije</th>
+                        </tr>
+                    </thead>
+                    <tbody id="categories-table">
+                        <tr><td colspan="4" class="loading">Učitavanje...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Orders Page -->
+        <div class="page" id="page-orders">
+            <div class="header">
+                <h1>Porudžbine</h1>
+                <button class="btn btn-primary" onclick="openOrderModal()">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                    Nova Porudžbina
+                </button>
+            </div>
+            
+            <div class="tabs">
+                <button class="tab active" data-status="all">Sve</button>
+                <button class="tab" data-status="new">Nove</button>
+                <button class="tab" data-status="processing">U obradi</button>
+                <button class="tab" data-status="shipped">Poslato</button>
+                <button class="tab" data-status="delivered">Dostavljeno</button>
+            </div>
+            
+            <div class="card">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Kupac</th>
+                            <th>Proizvodi</th>
+                            <th>Iznos</th>
+                            <th>Status</th>
+                            <th>Datum</th>
+                            <th>Akcije</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orders-table">
+                        <tr><td colspan="7" class="loading">Učitavanje...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Customers Page -->
+        <div class="page" id="page-customers">
+            <div class="header">
+                <h1>Kupci</h1>
+            </div>
+            
+            <div class="card">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Ime</th>
+                            <th>Telefon</th>
+                            <th>Grad</th>
+                            <th>Porudžbina</th>
+                            <th>Ukupno Potrošio</th>
+                            <th>Akcije</th>
+                        </tr>
+                    </thead>
+                    <tbody id="customers-table">
+                        <tr><td colspan="6" class="loading">Učitavanje...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Product Modal -->
+    <div class="modal-overlay" id="product-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="product-modal-title">Dodaj Proizvod</h3>
+                <button class="modal-close" onclick="closeModal('product-modal')">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:20px;height:20px"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="product-form">
+                    <input type="hidden" id="product-id">
+                    <div class="form-group">
+                        <label>Slika URL</label>
+                        <input type="text" id="product-image" placeholder="https://... ili img1.jpg">
+                    </div>
+                    <div class="form-group">
+                        <label>Naziv *</label>
+                        <input type="text" id="product-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Opis</label>
+                        <textarea id="product-description" rows="2"></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Cena (RSD) *</label>
+                            <input type="number" id="product-price" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Kategorija</label>
+                            <select id="product-category"></select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Badge</label>
+                            <select id="product-badge">
+                                <option value="">Bez badge-a</option>
+                                <option value="Novo">Novo</option>
+                                <option value="Hit">Hit</option>
+                                <option value="Limitirano">Limitirano</option>
+                                <option value="-20%">-20%</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Status</label>
+                            <select id="product-active">
+                                <option value="true">Aktivan</option>
+                                <option value="false">Neaktivan</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="product-featured"> Istaknut (Featured)
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('product-modal')">Otkaži</button>
+                <button class="btn btn-primary" onclick="saveProduct()">Sačuvaj</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Modal -->
+    <div class="modal-overlay" id="category-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="category-modal-title">Dodaj Kategoriju</h3>
+                <button class="modal-close" onclick="closeModal('category-modal')">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:20px;height:20px"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="category-form">
+                    <input type="hidden" id="category-id">
+                    <div class="form-group">
+                        <label>Naziv *</label>
+                        <input type="text" id="category-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Slug *</label>
+                        <input type="text" id="category-slug" required placeholder="npr. svece-u-casi">
+                    </div>
+                    <div class="form-group">
+                        <label>Redosled</label>
+                        <input type="number" id="category-order" value="0">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('category-modal')">Otkaži</button>
+                <button class="btn btn-primary" onclick="saveCategory()">Sačuvaj</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Modal -->
+    <div class="modal-overlay" id="order-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="order-modal-title">Nova Porudžbina</h3>
+                <button class="modal-close" onclick="closeModal('order-modal')">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:20px;height:20px"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="order-form">
+                    <input type="hidden" id="order-id">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Ime kupca *</label>
+                            <input type="text" id="order-customer-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Telefon *</label>
+                            <input type="text" id="order-customer-phone" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Grad</label>
+                            <input type="text" id="order-customer-city">
+                        </div>
+                        <div class="form-group">
+                            <label>Adresa</label>
+                            <input type="text" id="order-customer-address">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Proizvodi (JSON)</label>
+                        <textarea id="order-items" rows="3" placeholder='[{"name":"Proizvod","qty":1,"price":1000}]'></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Ukupno (RSD) *</label>
+                            <input type="number" id="order-total" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Status</label>
+                            <select id="order-status">
+                                <option value="new">Nova</option>
+                                <option value="processing">U obradi</option>
+                                <option value="shipped">Poslato</option>
+                                <option value="delivered">Dostavljeno</option>
+                                <option value="cancelled">Otkazano</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Napomena</label>
+                        <textarea id="order-notes" rows="2"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('order-modal')">Otkaži</button>
+                <button class="btn btn-primary" onclick="saveOrder()">Sačuvaj</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // Supabase Config
+        const SUPABASE_URL = 'https://fwddgazfzxjcwwwonnxq.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ3ZGRnYXpmenhqY3d3d29ubnhxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3Mzc1NzMsImV4cCI6MjA4NDMxMzU3M30.KfmCsYFoJqcrlupkcDLU-OP7oa7q_hWqHSUvf2Hyv8U';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Data
+        let categories = [];
+        let products = [];
+        let orders = [];
+        let customers = [];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAllData();
+            setupNavigation();
+            setCurrentDate();
+        });
+
+        function setCurrentDate() {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('currentDate').textContent = new Date().toLocaleDateString('sr-RS', options);
+        }
+
+        // Navigation
+        function setupNavigation() {
+            document.querySelectorAll('.sidebar-nav a').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const page = link.dataset.page;
+                    
+                    document.querySelectorAll('.sidebar-nav a').forEach(l => l.classList.remove('active'));
+                    link.classList.add('active');
+                    
+                    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                    document.getElementById('page-' + page).classList.add('active');
+                });
+            });
+
+            // Order status tabs
+            document.querySelectorAll('.tabs .tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.tabs .tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    renderOrders(tab.dataset.status);
+                });
+            });
+        }
+
+        // Load All Data
+        async function loadAllData() {
+            await Promise.all([
+                loadCategories(),
+                loadProducts(),
+                loadOrders(),
+                loadCustomers()
+            ]);
+            updateStats();
+        }
+
+        // Categories
+        async function loadCategories() {
+            const { data, error } = await supabase
+                .from('categories')
+                .select('*')
+                .order('sort_order');
+            
+            if (error) { showToast('Greška: ' + error.message); return; }
+            categories = data || [];
+            renderCategories();
+            populateCategorySelect();
+        }
+
+        function renderCategories() {
+            const tbody = document.getElementById('categories-table');
+            if (categories.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-light)">Nema kategorija</td></tr>';
+                return;
+            }
+            tbody.innerHTML = categories.map(c => `
+                <tr>
+                    <td><strong>${c.name}</strong></td>
+                    <td><code>${c.slug}</code></td>
+                    <td>${products.filter(p => p.category_id === c.id).length}</td>
+                    <td>
+                        <button class="btn btn-secondary btn-sm" onclick="editCategory(${c.id})">Izmeni</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteCategory(${c.id})">Obriši</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function populateCategorySelect() {
+            const select = document.getElementById('product-category');
+            select.innerHTML = '<option value="">-- Izaberi --</option>' + 
+                categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        }
+
+        function openCategoryModal(id = null) {
+            document.getElementById('category-modal-title').textContent = id ? 'Izmeni Kategoriju' : 'Dodaj Kategoriju';
+            document.getElementById('category-form').reset();
+            document.getElementById('category-id').value = '';
+            
+            if (id) {
+                const cat = categories.find(c => c.id === id);
+                if (cat) {
+                    document.getElementById('category-id').value = cat.id;
+                    document.getElementById('category-name').value = cat.name;
+                    document.getElementById('category-slug').value = cat.slug;
+                    document.getElementById('category-order').value = cat.sort_order || 0;
+                }
+            }
+            openModal('category-modal');
+        }
+
+        function editCategory(id) { openCategoryModal(id); }
+
+        async function saveCategory() {
+            const id = document.getElementById('category-id').value;
+            const data = {
+                name: document.getElementById('category-name').value,
+                slug: document.getElementById('category-slug').value,
+                sort_order: parseInt(document.getElementById('category-order').value) || 0
+            };
+
+            let result;
+            if (id) {
+                result = await supabase.from('categories').update(data).eq('id', id);
+            } else {
+                result = await supabase.from('categories').insert([data]);
+            }
+
+            if (result.error) { showToast('Greška: ' + result.error.message); return; }
+            
+            showToast('Kategorija sačuvana! ✓');
+            closeModal('category-modal');
+            loadCategories();
+        }
+
+        async function deleteCategory(id) {
+            if (!confirm('Da li ste sigurni?')) return;
+            const { error } = await supabase.from('categories').delete().eq('id', id);
+            if (error) { showToast('Greška: ' + error.message); return; }
+            showToast('Kategorija obrisana');
+            loadCategories();
+        }
+
+        // Products
+        async function loadProducts() {
+            const { data, error } = await supabase
+                .from('products')
+                .select('*')
+                .order('sort_order');
+            
+            if (error) { showToast('Greška: ' + error.message); return; }
+            products = data || [];
+            renderProducts();
+        }
+
+        function renderProducts() {
+            const tbody = document.getElementById('products-table');
+            if (products.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-light)">Nema proizvoda</td></tr>';
+                return;
+            }
+            tbody.innerHTML = products.map(p => {
+                const cat = categories.find(c => c.id === p.category_id);
+                return `
+                <tr>
+                    <td><img src="${p.image_url || 'https://via.placeholder.com/50'}" class="product-img" onerror="this.src='https://via.placeholder.com/50'"></td>
+                    <td><strong>${p.name}</strong><br><small style="color:var(--text-light)">${p.description || ''}</small></td>
+                    <td>${cat ? cat.name : '-'}</td>
+                    <td><strong>${p.price?.toLocaleString('sr')} RSD</strong></td>
+                    <td>${p.is_active ? '<span class="badge badge-success">Aktivan</span>' : '<span class="badge badge-danger">Neaktivan</span>'}</td>
+                    <td>
+                        <button class="btn btn-secondary btn-sm" onclick="editProduct(${p.id})">Izmeni</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteProduct(${p.id})">Obriši</button>
+                    </td>
+                </tr>
+            `}).join('');
+        }
+
+        function openProductModal(id = null) {
+            document.getElementById('product-modal-title').textContent = id ? 'Izmeni Proizvod' : 'Dodaj Proizvod';
+            document.getElementById('product-form').reset();
+            document.getElementById('product-id').value = '';
+            
+            if (id) {
+                const prod = products.find(p => p.id === id);
+                if (prod) {
+                    document.getElementById('product-id').value = prod.id;
+                    document.getElementById('product-name').value = prod.name;
+                    document.getElementById('product-description').value = prod.description || '';
+                    document.getElementById('product-price').value = prod.price;
+                    document.getElementById('product-image').value = prod.image_url || '';
+                    document.getElementById('product-category').value = prod.category_id || '';
+                    document.getElementById('product-badge').value = prod.badge || '';
+                    document.getElementById('product-active').value = prod.is_active ? 'true' : 'false';
+                    document.getElementById('product-featured').checked = prod.is_featured;
+                }
+            }
+            openModal('product-modal');
+        }
+
+        function editProduct(id) { openProductModal(id); }
+
+        async function saveProduct() {
+            const id = document.getElementById('product-id').value;
+            const data = {
+                name: document.getElementById('product-name').value,
+                description: document.getElementById('product-description').value,
+                price: parseInt(document.getElementById('product-price').value),
+                image_url: document.getElementById('product-image').value,
+                category_id: document.getElementById('product-category').value || null,
+                badge: document.getElementById('product-badge').value || null,
+                is_active: document.getElementById('product-active').value === 'true',
+                is_featured: document.getElementById('product-featured').checked
+            };
+
+            let result;
+            if (id) {
+                result = await supabase.from('products').update(data).eq('id', id);
+            } else {
+                result = await supabase.from('products').insert([data]);
+            }
+
+            if (result.error) { showToast('Greška: ' + result.error.message); return; }
+            
+            showToast('Proizvod sačuvan! ✓');
+            closeModal('product-modal');
+            loadProducts();
+        }
+
+        async function deleteProduct(id) {
+            if (!confirm('Da li ste sigurni?')) return;
+            const { error } = await supabase.from('products').delete().eq('id', id);
+            if (error) { showToast('Greška: ' + error.message); return; }
+            showToast('Proizvod obrisan');
+            loadProducts();
+        }
+
+        // Orders
+        async function loadOrders() {
+            const { data, error } = await supabase
+                .from('orders')
+                .select('*, customers(*)')
+                .order('created_at', { ascending: false });
+            
+            if (error) { showToast('Greška: ' + error.message); return; }
+            orders = data || [];
+            renderOrders('all');
+            renderRecentOrders();
+        }
+
+        function renderOrders(status = 'all') {
+            const tbody = document.getElementById('orders-table');
+            let filtered = status === 'all' ? orders : orders.filter(o => o.status === status);
+            
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-light)">Nema porudžbina</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = filtered.map(o => {
+                const items = o.items || [];
+                const itemsStr = items.map(i => `${i.name} x${i.qty}`).join(', ');
+                const statusClass = {
+                    'new': 'badge-info',
+                    'processing': 'badge-warning', 
+                    'shipped': 'badge-info',
+                    'delivered': 'badge-success',
+                    'cancelled': 'badge-danger'
+                }[o.status] || 'badge-info';
+                const statusText = {
+                    'new': 'Nova',
+                    'processing': 'U obradi',
+                    'shipped': 'Poslato',
+                    'delivered': 'Dostavljeno',
+                    'cancelled': 'Otkazano'
+                }[o.status] || o.status;
+                
+                return `
+                <tr>
+                    <td>#${o.id}</td>
+                    <td><strong>${o.customers?.name || '-'}</strong><br><small>${o.customers?.phone || ''}</small></td>
+                    <td><small>${itemsStr || '-'}</small></td>
+                    <td><strong>${o.total?.toLocaleString('sr')} RSD</strong></td>
+                    <td><span class="badge ${statusClass}">${statusText}</span></td>
+                    <td>${new Date(o.created_at).toLocaleDateString('sr')}</td>
+                    <td>
+                        <button class="btn btn-secondary btn-sm" onclick="editOrder(${o.id})">Izmeni</button>
+                    </td>
+                </tr>
+            `}).join('');
+        }
+
+        function renderRecentOrders() {
+            const tbody = document.getElementById('recent-orders');
+            const recent = orders.slice(0, 5);
+            
+            if (recent.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-light)">Nema porudžbina</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = recent.map(o => {
+                const statusClass = {'new':'badge-info','processing':'badge-warning','shipped':'badge-info','delivered':'badge-success','cancelled':'badge-danger'}[o.status] || 'badge-info';
+                const statusText = {'new':'Nova','processing':'U obradi','shipped':'Poslato','delivered':'Dostavljeno','cancelled':'Otkazano'}[o.status] || o.status;
+                return `
+                <tr>
+                    <td>#${o.id}</td>
+                    <td>${o.customers?.name || '-'}</td>
+                    <td><strong>${o.total?.toLocaleString('sr')} RSD</strong></td>
+                    <td><span class="badge ${statusClass}">${statusText}</span></td>
+                    <td>${new Date(o.created_at).toLocaleDateString('sr')}</td>
+                </tr>
+            `}).join('');
+        }
+
+        function openOrderModal(id = null) {
+            document.getElementById('order-modal-title').textContent = id ? 'Izmeni Porudžbinu' : 'Nova Porudžbina';
+            document.getElementById('order-form').reset();
+            document.getElementById('order-id').value = '';
+            
+            if (id) {
+                const order = orders.find(o => o.id === id);
+                if (order) {
+                    document.getElementById('order-id').value = order.id;
+                    document.getElementById('order-customer-name').value = order.customers?.name || '';
+                    document.getElementById('order-customer-phone').value = order.customers?.phone || '';
+                    document.getElementById('order-customer-city').value = order.customers?.city || '';
+                    document.getElementById('order-customer-address').value = order.customers?.address || '';
+                    document.getElementById('order-items').value = JSON.stringify(order.items || []);
+                    document.getElementById('order-total').value = order.total;
+                    document.getElementById('order-status').value = order.status;
+                    document.getElementById('order-notes').value = order.notes || '';
+                }
+            }
+            openModal('order-modal');
+        }
+
+        function editOrder(id) { openOrderModal(id); }
+
+        async function saveOrder() {
+            const id = document.getElementById('order-id').value;
+            const customerName = document.getElementById('order-customer-name').value;
+            const customerPhone = document.getElementById('order-customer-phone').value;
+            
+            // First, find or create customer
+            let customerId;
+            const { data: existingCustomer } = await supabase
+                .from('customers')
+                .select('id')
+                .eq('phone', customerPhone)
+                .single();
+            
+            if (existingCustomer) {
+                customerId = existingCustomer.id;
+            } else {
+                const { data: newCustomer, error } = await supabase
+                    .from('customers')
+                    .insert([{
+                        name: customerName,
+                        phone: customerPhone,
+                        city: document.getElementById('order-customer-city').value,
+                        address: document.getElementById('order-customer-address').value
+                    }])
+                    .select()
+                    .single();
+                
+                if (error) { showToast('Greška: ' + error.message); return; }
+                customerId = newCustomer.id;
+            }
+
+            let items;
+            try {
+                items = JSON.parse(document.getElementById('order-items').value || '[]');
+            } catch (e) {
+                items = [];
+            }
+
+            const orderData = {
+                customer_id: customerId,
+                items: items,
+                total: parseInt(document.getElementById('order-total').value),
+                status: document.getElementById('order-status').value,
+                notes: document.getElementById('order-notes').value
+            };
+
+            let result;
+            if (id) {
+                result = await supabase.from('orders').update(orderData).eq('id', id);
+            } else {
+                result = await supabase.from('orders').insert([orderData]);
+            }
+
+            if (result.error) { showToast('Greška: ' + result.error.message); return; }
+            
+            showToast('Porudžbina sačuvana! ✓');
+            closeModal('order-modal');
+            loadOrders();
+            loadCustomers();
+        }
+
+        // Customers
+        async function loadCustomers() {
+            const { data, error } = await supabase
+                .from('customers')
+                .select('*')
+                .order('created_at', { ascending: false });
+            
+            if (error) { showToast('Greška: ' + error.message); return; }
+            customers = data || [];
+            renderCustomers();
+        }
+
+        function renderCustomers() {
+            const tbody = document.getElementById('customers-table');
+            if (customers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-light)">Nema kupaca</td></tr>';
+                return;
+            }
+            tbody.innerHTML = customers.map(c => `
+                <tr>
+                    <td><strong>${c.name}</strong></td>
+                    <td>${c.phone}</td>
+                    <td>${c.city || '-'}</td>
+                    <td>${c.total_orders || 0}</td>
+                    <td>${(c.total_spent || 0).toLocaleString('sr')} RSD</td>
+                    <td>
+                        <button class="btn btn-secondary btn-sm" onclick="viewCustomer(${c.id})">Detalji</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function viewCustomer(id) {
+            const customer = customers.find(c => c.id === id);
+            if (customer) {
+                alert(`Kupac: ${customer.name}\nTelefon: ${customer.phone}\nGrad: ${customer.city || '-'}\nAdresa: ${customer.address || '-'}`);
+            }
+        }
+
+        // Stats
+        function updateStats() {
+            document.getElementById('stat-products').textContent = products.length;
+            document.getElementById('stat-categories').textContent = categories.length;
+            document.getElementById('stat-orders').textContent = orders.length;
+            document.getElementById('stat-customers').textContent = customers.length;
+        }
+
+        // Modal helpers
+        function openModal(id) { document.getElementById(id).classList.add('open'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+        // Toast
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // Auto-generate slug
+        document.getElementById('category-name')?.addEventListener('input', (e) => {
+            const slug = e.target.value.toLowerCase()
+                .replace(/[čć]/g, 'c').replace(/š/g, 's').replace(/ž/g, 'z').replace(/đ/g, 'dj')
+                .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+            document.getElementById('category-slug').value = slug;
+        });
+    </script>
+</body>
+</html>
