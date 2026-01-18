@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TAISS Admin Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{--primary:#b8956e;--primary-dark:#96784d;--bg:#f5f5f7;--white:#fff;--text:#1d1d1f;--text-light:#86868b;--border:#e5e5e7;--success:#34c759;--danger:#ff3b30;--warning:#ff9500}
+        body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text)}
+        .sidebar{position:fixed;left:0;top:0;bottom:0;width:240px;background:var(--white);border-right:1px solid var(--border);padding:1.5rem;display:flex;flex-direction:column}
+        .sidebar-logo{font-size:1.5rem;font-weight:700;color:var(--primary);margin-bottom:2rem}
+        .sidebar-nav{list-style:none;flex:1}
+        .sidebar-nav li{margin-bottom:0.5rem}
+        .sidebar-nav a{display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1rem;text-decoration:none;color:var(--text-light);border-radius:8px;transition:all 0.2s;font-size:0.9rem;font-weight:500}
+        .sidebar-nav a:hover,.sidebar-nav a.active{background:var(--bg);color:var(--text)}
+        .sidebar-nav a.active{color:var(--primary)}
+        .sidebar-nav svg{width:20px;height:20px}
+        .main{margin-left:240px;padding:2rem;min-height:100vh}
+        .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem}
+        .header h1{font-size:1.75rem;font-weight:600}
+        .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;margin-bottom:2rem}
+        .stat-card{background:var(--white);border-radius:12px;padding:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.05)}
+        .stat-card-label{font-size:0.8rem;color:var(--text-light);margin-bottom:0.5rem}
+        .stat-card-value{font-size:2rem;font-weight:700;color:var(--text)}
+        .card{background:var(--white);border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,0.05);overflow:hidden}
+        .card-header{display:flex;justify-content:space-between;align-items:center;padding:1.25rem 1.5rem;border-bottom:1px solid var(--border)}
+        .card-header h2{font-size:1.1rem;font-weight:600}
+        table{width:100%;border-collapse:collapse}
+        th,td{padding:1rem 1.5rem;text-align:left;border-bottom:1px solid var(--border)}
+        th{font-size:0.75rem;font-weight:600;color:var(--text-light);text-transform:uppercase;letter-spacing:0.05em}
+        td{font-size:0.9rem}
+        tr:last-child td{border-bottom:none}
+        tr:hover{background:var(--bg)}
+        .btn{display:inline-flex;align-items:center;gap:0.5rem;padding:0.6rem 1.2rem;border-radius:8px;font-size:0.85rem;font-weight:500;cursor:pointer;transition:all 0.2s;border:none;font-family:inherit}
+        .btn-primary{background:var(--primary);color:white}
+        .btn-primary:hover{background:var(--primary-dark)}
+        .btn-secondary{background:var(--bg);color:var(--text)}
+        .btn-danger{background:#fee;color:var(--danger)}
+        .btn-danger:hover{background:var(--danger);color:white}
+        .btn-sm{padding:0.4rem 0.8rem;font-size:0.8rem}
+        .badge{display:inline-block;padding:0.25rem 0.6rem;border-radius:50px;font-size:0.7rem;font-weight:600}
+        .badge-success{background:#e8f8ed;color:var(--success)}
+        .badge-warning{background:#fff4e5;color:var(--warning)}
+        .badge-danger{background:#fee;color:var(--danger)}
+        .badge-info{background:#e5f1ff;color:#007aff}
+        .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:1000}
+        .modal-overlay.open{display:flex}
+        .modal{background:var(--white);border-radius:16px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto}
+        .modal-header{display:flex;justify-content:space-between;align-items:center;padding:1.25rem 1.5rem;border-bottom:1px solid var(--border)}
+        .modal-header h3{font-size:1.1rem;font-weight:600}
+        .modal-close{background:none;border:none;cursor:pointer;padding:0.5rem}
+        .modal-body{padding:1.5rem}
+        .modal-footer{padding:1rem 1.5rem;border-top:1px solid var(--border);display:flex;gap:0.75rem;justify-content:flex-end}
+        .form-group{margin-bottom:1.25rem}
+        .form-group label{display:block;font-size:0.8rem;font-weight:500;margin-bottom:0.5rem;color:var(--text-light)}
+        .form-group input,.form-group select,.form-group textarea{width:100%;padding:0.75rem 1rem;border:1px solid var(--border);border-radius:8px;font-size:0.9rem;font-family:inherit}
+        .form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:var(--primary)}
+        .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+        .product-img{width:50px;height:50px;border-radius:8px;object-fit:cover}
+        .page{display:none}
+        .page.active{display:block}
+        .toast{position:fixed;bottom:2rem;right:2rem;background:var(--text);color:white;padding:1rem 1.5rem;border-radius:10px;font-size:0.9rem;opacity:0;transform:translateY(20px);transition:all 0.3s;z-index:2000}
+        .toast.show{opacity:1;transform:translateY(0)}
+        .loading{text-align:center;padding:3rem;color:var(--text-light)}
+        .tabs{display:flex;gap:0.5rem;margin-bottom:1.5rem}
+        .tab{padding:0.6rem 1.2rem;border-radius:8px;font-size:0.85rem;font-weight:500;cursor:pointer;background:transparent;border:none;color:var(--text-light);font-family:inherit}
+        .tab.active{background:var(--white);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,0.1)}
+        @media(max-width:1024px){.stats-grid{grid-template-columns:repeat(2,1fr)}}
+        @media(max-width:768px){.sidebar{width:70px;padding:1rem 0.5rem}.sidebar-logo{font-size:1rem;text-align:center}.sidebar-nav a span{display:none}.sidebar-nav a{justify-content:center;padding:0.75rem}.main{margin-left:70px;padding:1rem}.stats-grid{grid-template-columns:1fr}.form-row{grid-template-columns:1fr}}
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="sidebar-logo">TAISS</div>
+        <ul class="sidebar-nav">
+            <li><a href="#" class="active" data-page="dashboard"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"/></svg><span>Dashboard</span></a></li>
+            <li><a href="#" data-page="products"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"/></svg><span>Proizvodi</span></a></li>
+            <li><a href="#" data-page="categories"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z"/><path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z"/></svg><span>Kategorije</span></a></li>
+            <li><a href="#" data-page="orders"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg><span>Porudžbine</span></a></li>
+            <li><a href="#" data-page="customers"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg><span>Kupci</span></a></li>
+        </ul>
+    </aside>
+
+    <main class="main">
+        <!-- Dashboard -->
+        <div class="page active" id="page-dashboard">
+            <div class="header"><h1>Dashboard</h1><div style="font-size:0.9rem;color:var(--text-light)" id="currentDate"></div></div>
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-card-label">Ukupno Proizvoda</div><div class="stat-card-value" id="stat-products">0</div></div>
+                <div class="stat-card"><div class="stat-card-label">Kategorija</div><div class="stat-card-value" id="stat-categories">0</div></div>
+                <div class="stat-card"><div class="stat-card-label">Porudžbina</div><div class="stat-card-value" id="stat-orders">0</div></div>
+                <div class="stat-card"><div class="stat-card-label">Kupaca</div><div class="stat-card-value" id="stat-customers">0</div></div>
+            </div>
+            <div class="card"><div class="card-header"><h2>Poslednje Porudžbine</h2></div>
+                <table><thead><tr><th>ID</th><th>Kupac</th><th>Iznos</th><th>Status</th><th>Datum</th></tr></thead>
+                <tbody id="recent-orders"><tr><td colspan="5" class="loading">Učitavanje...</td></tr></tbody></table>
+            </div>
+        </div>
+
+        <!-- Products -->
+        <div class="page" id="page-products">
+            <div class="header"><h1>Proizvodi</h1><button class="btn btn-primary" onclick="openProductModal()">+ Dodaj Proizvod</button></div>
+            <div class="card"><table><thead><tr><th>Slika</th><th>Naziv</th><th>Kategorija</th><th>Cena</th><th>Status</th><th>Akcije</th></tr></thead>
+            <tbody id="products-table"><tr><td colspan="6" class="loading">Učitavanje...</td></tr></tbody></table></div>
+        </div>
+
+        <!-- Categories -->
+        <div class="page" id="page-categories">
+            <div class="header"><h1>Kategorije</h1><button class="btn btn-primary" onclick="openCategoryModal()">+ Dodaj Kategoriju</button></div>
+            <div class="card"><table><thead><tr><th>Naziv</th><th>Slug</th><th>Proizvoda</th><th>Akcije</th></tr></thead>
+            <tbody id="categories-table"><tr><td colspan="4" class="loading">Učitavanje...</td></tr></tbody></table></div>
+        </div>
+
+        <!-- Orders -->
+        <div class="page" id="page-orders">
+            <div class="header"><h1>Porudžbine</h1><button class="btn btn-primary" onclick="openOrderModal()">+ Nova Porudžbina</button></div>
+            <div class="tabs"><button class="tab active" data-status="all">Sve</button><button class="tab" data-status="new">Nove</button><button class="tab" data-status="processing">U obradi</button><button class="tab" data-status="delivered">Dostavljeno</button></div>
+            <div class="card"><table><thead><tr><th>ID</th><th>Kupac</th><th>Iznos</th><th>Status</th><th>Datum</th><th>Akcije</th></tr></thead>
+            <tbody id="orders-table"><tr><td colspan="6" class="loading">Učitavanje...</td></tr></tbody></table></div>
+        </div>
+
+        <!-- Customers -->
+        <div class="page" id="page-customers">
+            <div class="header"><h1>Kupci</h1></div>
+            <div class="card"><table><thead><tr><th>Ime</th><th>Telefon</th><th>Grad</th><th>Porudžbina</th><th>Potrošio</th></tr></thead>
+            <tbody id="customers-table"><tr><td colspan="5" class="loading">Učitavanje...</td></tr></tbody></table></div>
+        </div>
+    </main>
+
+    <!-- Product Modal -->
+    <div class="modal-overlay" id="product-modal">
+        <div class="modal">
+            <div class="modal-header"><h3 id="product-modal-title">Dodaj Proizvod</h3><button class="modal-close" onclick="closeModal('product-modal')">✕</button></div>
+            <div class="modal-body">
+                <input type="hidden" id="product-id">
+                <div class="form-group"><label>Slika URL</label><input type="text" id="product-image" placeholder="img11.jpg"></div>
+                <div class="form-group"><label>Naziv *</label><input type="text" id="product-name" required></div>
+                <div class="form-group"><label>Opis</label><textarea id="product-description" rows="2"></textarea></div>
+                <div class="form-row">
+                    <div class="form-group"><label>Cena (RSD) *</label><input type="number" id="product-price" required></div>
+                    <div class="form-group"><label>Kategorija</label><select id="product-category"></select></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Badge</label><select id="product-badge"><option value="">Bez</option><option value="Novo">Novo</option><option value="Hit">Hit</option><option value="Limitirano">Limitirano</option></select></div>
+                    <div class="form-group"><label>Status</label><select id="product-active"><option value="true">Aktivan</option><option value="false">Neaktivan</option></select></div>
+                </div>
+                <div class="form-group"><label><input type="checkbox" id="product-featured"> Istaknut (Featured)</label></div>
+            </div>
+            <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('product-modal')">Otkaži</button><button class="btn btn-primary" onclick="saveProduct()">Sačuvaj</button></div>
+        </div>
+    </div>
+
+    <!-- Category Modal -->
+    <div class="modal-overlay" id="category-modal">
+        <div class="modal">
+            <div class="modal-header"><h3>Dodaj Kategoriju</h3><button class="modal-close" onclick="closeModal('category-modal')">✕</button></div>
+            <div class="modal-body">
+                <input type="hidden" id="category-id">
+                <div class="form-group"><label>Naziv *</label><input type="text" id="category-name" required></div>
+                <div class="form-group"><label>Slug *</label><input type="text" id="category-slug" placeholder="npr. svece-u-casi"></div>
+                <div class="form-group"><label>Redosled</label><input type="number" id="category-order" value="0"></div>
+            </div>
+            <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('category-modal')">Otkaži</button><button class="btn btn-primary" onclick="saveCategory()">Sačuvaj</button></div>
+        </div>
+    </div>
+
+    <!-- Order Modal -->
+    <div class="modal-overlay" id="order-modal">
+        <div class="modal">
+            <div class="modal-header"><h3>Nova Porudžbina</h3><button class="modal-close" onclick="closeModal('order-modal')">✕</button></div>
+            <div class="modal-body">
+                <input type="hidden" id="order-id">
+                <div class="form-row">
+                    <div class="form-group"><label>Ime *</label><input type="text" id="order-name" required></div>
+                    <div class="form-group"><label>Telefon *</label><input type="text" id="order-phone" required></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Grad</label><input type="text" id="order-city"></div>
+                    <div class="form-group"><label>Adresa</label><input type="text" id="order-address"></div>
+                </div>
+                <div class="form-group"><label>Proizvodi (JSON)</label><textarea id="order-items" rows="2" placeholder='[{"name":"Sveća","qty":1,"price":1000}]'></textarea></div>
+                <div class="form-row">
+                    <div class="form-group"><label>Ukupno (RSD) *</label><input type="number" id="order-total" required></div>
+                    <div class="form-group"><label>Status</label><select id="order-status"><option value="new">Nova</option><option value="processing">U obradi</option><option value="delivered">Dostavljeno</option><option value="cancelled">Otkazano</option></select></div>
+                </div>
+            </div>
+            <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('order-modal')">Otkaži</button><button class="btn btn-primary" onclick="saveOrder()">Sačuvaj</button></div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // SUPABASE CONFIG
+        const SUPABASE_URL = 'https://fwddgazfzxjcwwwonnxq.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ3ZGRnYXpmenhqY3d3d29ubnhxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3Mzc1NzMsImV4cCI6MjA4NDMxMzU3M30.KfmCsYFoJqcrlupkcDLU-OP7oa7q_hWqHSUvf2Hyv8U';
+        
+        const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let categories = [];
+        let products = [];
+        let orders = [];
+        let customers = [];
+
+        // INIT
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('currentDate').textContent = new Date().toLocaleDateString('sr-RS', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
+            setupNav();
+            loadAll();
+        });
+
+        function setupNav() {
+            document.querySelectorAll('.sidebar-nav a').forEach(link => {
+                link.addEventListener('click', e => {
+                    e.preventDefault();
+                    document.querySelectorAll('.sidebar-nav a').forEach(l => l.classList.remove('active'));
+                    link.classList.add('active');
+                    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                    document.getElementById('page-' + link.dataset.page).classList.add('active');
+                });
+            });
+            document.querySelectorAll('.tabs .tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.tabs .tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    renderOrders(tab.dataset.status);
+                });
+            });
+        }
+
+        async function loadAll() {
+            await loadCategories();
+            await loadProducts();
+            await loadOrders();
+            await loadCustomers();
+            updateStats();
+        }
+
+        // CATEGORIES
+        async function loadCategories() {
+            const { data, error } = await db.from('categories').select('*').order('sort_order');
+            if (error) { console.error(error); showToast('Greška: ' + error.message); return; }
+            categories = data || [];
+            renderCategories();
+            populateCategorySelect();
+        }
+
+        function renderCategories() {
+            const tbody = document.getElementById('categories-table');
+            if (!categories.length) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#999">Nema kategorija</td></tr>'; return; }
+            tbody.innerHTML = categories.map(c => `<tr>
+                <td><strong>${c.name}</strong></td>
+                <td><code>${c.slug}</code></td>
+                <td>${products.filter(p => p.category_id === c.id).length}</td>
+                <td><button class="btn btn-secondary btn-sm" onclick="editCategory(${c.id})">Izmeni</button> <button class="btn btn-danger btn-sm" onclick="deleteCategory(${c.id})">Obriši</button></td>
+            </tr>`).join('');
+        }
+
+        function populateCategorySelect() {
+            document.getElementById('product-category').innerHTML = '<option value="">-- Izaberi --</option>' + categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        }
+
+        function openCategoryModal() { document.getElementById('category-id').value = ''; document.getElementById('category-name').value = ''; document.getElementById('category-slug').value = ''; document.getElementById('category-order').value = '0'; openModal('category-modal'); }
+        
+        function editCategory(id) {
+            const c = categories.find(x => x.id === id);
+            if (c) { document.getElementById('category-id').value = c.id; document.getElementById('category-name').value = c.name; document.getElementById('category-slug').value = c.slug; document.getElementById('category-order').value = c.sort_order || 0; openModal('category-modal'); }
+        }
+
+        async function saveCategory() {
+            const id = document.getElementById('category-id').value;
+            const data = { name: document.getElementById('category-name').value, slug: document.getElementById('category-slug').value, sort_order: parseInt(document.getElementById('category-order').value) || 0 };
+            let result = id ? await db.from('categories').update(data).eq('id', id) : await db.from('categories').insert([data]);
+            if (result.error) { showToast('Greška: ' + result.error.message); return; }
+            showToast('Sačuvano ✓'); closeModal('category-modal'); loadCategories();
+        }
+
+        async function deleteCategory(id) {
+            if (!confirm('Obrisati?')) return;
+            const { error } = await db.from('categories').delete().eq('id', id);
+            if (error) { showToast('Greška: ' + error.message); return; }
+            showToast('Obrisano'); loadCategories();
+        }
+
+        // PRODUCTS
+        async function loadProducts() {
+            const { data, error } = await db.from('products').select('*').order('sort_order');
+            if (error) { console.error(error); showToast('Greška: ' + error.message); return; }
+            products = data || [];
+            renderProducts();
+        }
+
+        function renderProducts() {
+            const tbody = document.getElementById('products-table');
+            if (!products.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999">Nema proizvoda</td></tr>'; return; }
+            tbody.innerHTML = products.map(p => {
+                const cat = categories.find(c => c.id === p.category_id);
+                return `<tr>
+                    <td><img src="${p.image_url || 'https://via.placeholder.com/50'}" class="product-img" onerror="this.src='https://via.placeholder.com/50'"></td>
+                    <td><strong>${p.name}</strong><br><small style="color:#999">${p.description || ''}</small></td>
+                    <td>${cat ? cat.name : '-'}</td>
+                    <td><strong>${(p.price||0).toLocaleString('sr')} RSD</strong></td>
+                    <td>${p.is_active ? '<span class="badge badge-success">Aktivan</span>' : '<span class="badge badge-danger">Neaktivan</span>'}</td>
+                    <td><button class="btn btn-secondary btn-sm" onclick="editProduct(${p.id})">Izmeni</button> <button class="btn btn-danger btn-sm" onclick="deleteProduct(${p.id})">Obriši</button></td>
+                </tr>`;
+            }).join('');
+        }
+
+        function openProductModal() { document.getElementById('product-id').value = ''; document.getElementById('product-name').value = ''; document.getElementById('product-description').value = ''; document.getElementById('product-price').value = ''; document.getElementById('product-image').value = ''; document.getElementById('product-category').value = ''; document.getElementById('product-badge').value = ''; document.getElementById('product-active').value = 'true'; document.getElementById('product-featured').checked = false; openModal('product-modal'); }
+
+        function editProduct(id) {
+            const p = products.find(x => x.id === id);
+            if (p) { document.getElementById('product-id').value = p.id; document.getElementById('product-name').value = p.name; document.getElementById('product-description').value = p.description || ''; document.getElementById('product-price').value = p.price; document.getElementById('product-image').value = p.image_url || ''; document.getElementById('product-category').value = p.category_id || ''; document.getElementById('product-badge').value = p.badge || ''; document.getElementById('product-active').value = p.is_active ? 'true' : 'false'; document.getElementById('product-featured').checked = p.is_featured; openModal('product-modal'); }
+        }
+
+        async function saveProduct() {
+            const id = document.getElementById('product-id').value;
+            const data = { name: document.getElementById('product-name').value, description: document.getElementById('product-description').value, price: parseInt(document.getElementById('product-price').value), image_url: document.getElementById('product-image').value, category_id: document.getElementById('product-category').value || null, badge: document.getElementById('product-badge').value || null, is_active: document.getElementById('product-active').value === 'true', is_featured: document.getElementById('product-featured').checked };
+            let result = id ? await db.from('products').update(data).eq('id', id) : await db.from('products').insert([data]);
+            if (result.error) { showToast('Greška: ' + result.error.message); return; }
+            showToast('Sačuvano ✓'); closeModal('product-modal'); loadProducts(); updateStats();
+        }
+
+        async function deleteProduct(id) {
+            if (!confirm('Obrisati?')) return;
+            const { error } = await db.from('products').delete().eq('id', id);
+            if (error) { showToast('Greška: ' + error.message); return; }
+            showToast('Obrisano'); loadProducts(); updateStats();
+        }
+
+        // ORDERS
+        async function loadOrders() {
+            const { data, error } = await db.from('orders').select('*, customers(*)').order('created_at', { ascending: false });
+            if (error) { console.error(error); return; }
+            orders = data || [];
+            renderOrders('all');
+            renderRecentOrders();
+        }
+
+        function renderOrders(status) {
+            const tbody = document.getElementById('orders-table');
+            const filtered = status === 'all' ? orders : orders.filter(o => o.status === status);
+            if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999">Nema porudžbina</td></tr>'; return; }
+            const statusMap = { new: ['Nova', 'badge-info'], processing: ['U obradi', 'badge-warning'], delivered: ['Dostavljeno', 'badge-success'], cancelled: ['Otkazano', 'badge-danger'] };
+            tbody.innerHTML = filtered.map(o => {
+                const [label, cls] = statusMap[o.status] || ['?', 'badge-info'];
+                return `<tr>
+                    <td>#${o.id}</td>
+                    <td><strong>${o.customers?.name || '-'}</strong><br><small>${o.customers?.phone || ''}</small></td>
+                    <td><strong>${(o.total||0).toLocaleString('sr')} RSD</strong></td>
+                    <td><span class="badge ${cls}">${label}</span></td>
+                    <td>${new Date(o.created_at).toLocaleDateString('sr')}</td>
+                    <td><button class="btn btn-secondary btn-sm" onclick="editOrder(${o.id})">Izmeni</button></td>
+                </tr>`;
+            }).join('');
+        }
+
+        function renderRecentOrders() {
+            const tbody = document.getElementById('recent-orders');
+            if (!orders.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#999">Nema porudžbina</td></tr>'; return; }
+            const statusMap = { new: ['Nova', 'badge-info'], processing: ['U obradi', 'badge-warning'], delivered: ['Dostavljeno', 'badge-success'], cancelled: ['Otkazano', 'badge-danger'] };
+            tbody.innerHTML = orders.slice(0, 5).map(o => {
+                const [label, cls] = statusMap[o.status] || ['?', 'badge-info'];
+                return `<tr><td>#${o.id}</td><td>${o.customers?.name || '-'}</td><td><strong>${(o.total||0).toLocaleString('sr')} RSD</strong></td><td><span class="badge ${cls}">${label}</span></td><td>${new Date(o.created_at).toLocaleDateString('sr')}</td></tr>`;
+            }).join('');
+        }
+
+        function openOrderModal() { document.getElementById('order-id').value = ''; document.getElementById('order-name').value = ''; document.getElementById('order-phone').value = ''; document.getElementById('order-city').value = ''; document.getElementById('order-address').value = ''; document.getElementById('order-items').value = ''; document.getElementById('order-total').value = ''; document.getElementById('order-status').value = 'new'; openModal('order-modal'); }
+
+        function editOrder(id) {
+            const o = orders.find(x => x.id === id);
+            if (o) { document.getElementById('order-id').value = o.id; document.getElementById('order-name').value = o.customers?.name || ''; document.getElementById('order-phone').value = o.customers?.phone || ''; document.getElementById('order-city').value = o.customers?.city || ''; document.getElementById('order-address').value = o.customers?.address || ''; document.getElementById('order-items').value = JSON.stringify(o.items || []); document.getElementById('order-total').value = o.total; document.getElementById('order-status').value = o.status; openModal('order-modal'); }
+        }
+
+        async function saveOrder() {
+            const id = document.getElementById('order-id').value;
+            const name = document.getElementById('order-name').value;
+            const phone = document.getElementById('order-phone').value;
+            
+            // Find or create customer
+            let customerId;
+            const { data: existing } = await db.from('customers').select('id').eq('phone', phone).single();
+            if (existing) { customerId = existing.id; }
+            else {
+                const { data: newCust, error } = await db.from('customers').insert([{ name, phone, city: document.getElementById('order-city').value, address: document.getElementById('order-address').value }]).select().single();
+                if (error) { showToast('Greška: ' + error.message); return; }
+                customerId = newCust.id;
+            }
+            
+            let items = [];
+            try { items = JSON.parse(document.getElementById('order-items').value || '[]'); } catch(e) {}
+            
+            const orderData = { customer_id: customerId, items, total: parseInt(document.getElementById('order-total').value), status: document.getElementById('order-status').value };
+            let result = id ? await db.from('orders').update(orderData).eq('id', id) : await db.from('orders').insert([orderData]);
+            if (result.error) { showToast('Greška: ' + result.error.message); return; }
+            showToast('Sačuvano ✓'); closeModal('order-modal'); loadOrders(); loadCustomers(); updateStats();
+        }
+
+        // CUSTOMERS
+        async function loadCustomers() {
+            const { data, error } = await db.from('customers').select('*').order('created_at', { ascending: false });
+            if (error) { console.error(error); return; }
+            customers = data || [];
+            renderCustomers();
+        }
+
+        function renderCustomers() {
+            const tbody = document.getElementById('customers-table');
+            if (!customers.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#999">Nema kupaca</td></tr>'; return; }
+            tbody.innerHTML = customers.map(c => `<tr><td><strong>${c.name}</strong></td><td>${c.phone}</td><td>${c.city || '-'}</td><td>${c.total_orders || 0}</td><td>${(c.total_spent || 0).toLocaleString('sr')} RSD</td></tr>`).join('');
+        }
+
+        // STATS
+        function updateStats() {
+            document.getElementById('stat-products').textContent = products.length;
+            document.getElementById('stat-categories').textContent = categories.length;
+            document.getElementById('stat-orders').textContent = orders.length;
+            document.getElementById('stat-customers').textContent = customers.length;
+        }
+
+        // HELPERS
+        function openModal(id) { document.getElementById(id).classList.add('open'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+        function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
+
+        // Auto slug
+        document.getElementById('category-name').addEventListener('input', e => {
+            document.getElementById('category-slug').value = e.target.value.toLowerCase().replace(/[čć]/g,'c').replace(/š/g,'s').replace(/ž/g,'z').replace(/đ/g,'dj').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+        });
+    </script>
+</body>
+</html>
