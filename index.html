@@ -126,9 +126,15 @@
         .product-category{font-size:0.6rem;color:var(--gold);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.3rem}
         .product-name{font-family:'Cormorant Garamond',serif;font-size:1.1rem;margin-bottom:0.3rem}
         .product-desc{font-size:0.75rem;color:var(--text-muted);margin-bottom:0.8rem;line-height:1.5;transition:all 0.3s ease}
-        .product-footer{display:flex;justify-content:space-between;align-items:center;padding-top:0.8rem;border-top:1px solid var(--border)}
+        .product-footer{display:flex;justify-content:space-between;align-items:center;padding-top:0.8rem;border-top:1px solid var(--border);gap:0.5rem}
         .product-price{font-weight:600;color:var(--gold-dark);font-size:1rem}
         .product-price span{font-size:0.75rem;font-weight:400;color:var(--text-muted)}
+        .product-actions{display:flex;align-items:center;gap:0.5rem}
+        .qty-control{display:flex;align-items:center;border:1px solid var(--border);border-radius:6px;overflow:hidden}
+        .qty-control button{width:28px;height:28px;border:none;background:var(--bg);cursor:pointer;font-size:1rem;color:var(--text);transition:all 0.2s;display:flex;align-items:center;justify-content:center}
+        .qty-control button:hover{background:var(--gold);color:white}
+        .qty-control input{width:32px;height:28px;border:none;border-left:1px solid var(--border);border-right:1px solid var(--border);text-align:center;font-size:0.85rem;font-weight:600;font-family:inherit;background:var(--white);-moz-appearance:textfield}
+        .qty-control input::-webkit-outer-spin-button,.qty-control input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
         .add-btn{padding:0.5rem 1rem;background:var(--bg);border:none;font-size:0.7rem;font-weight:500;color:var(--text);cursor:pointer;border-radius:6px;transition:all 0.3s;font-family:inherit;text-transform:uppercase}
         .add-btn:hover{background:var(--gold);color:white}
         
@@ -260,9 +266,12 @@
             .product-desc{display:none;max-height:0;overflow:hidden;margin-bottom:0}
             .product-card.expanded .product-desc{display:block;max-height:200px;margin-bottom:0.8rem;animation:slideDown 0.3s ease}
             .expand-hint{display:block}
-            .product-footer{padding-top:0.6rem}
-            .product-price{font-size:0.9rem}
-            .add-btn{padding:0.4rem 0.8rem;font-size:0.65rem}
+            .product-footer{padding-top:0.6rem;flex-wrap:wrap}
+            .product-price{font-size:0.9rem;width:100%;margin-bottom:0.5rem}
+            .product-actions{width:100%;justify-content:space-between}
+            .qty-control button{width:32px;height:32px}
+            .qty-control input{width:36px;height:32px}
+            .add-btn{padding:0.5rem 1rem;font-size:0.7rem;flex:1}
         }
         @media(max-width:480px){
             .products-grid,.featured-grid{grid-template-columns:1fr}
@@ -277,8 +286,16 @@
             .btn{padding:0.85rem 1.5rem;font-size:0.8rem}
             .features-inner{grid-template-columns:1fr 1fr}
             .product-desc{font-size:0.8rem}
+            .product-footer{flex-wrap:nowrap}
+            .product-price{width:auto;margin-bottom:0}
+            .product-actions{width:auto;flex:1;justify-content:flex-end}
         }
         @keyframes slideDown{from{max-height:0;opacity:0}to{max-height:200px;opacity:1}}
+        @media(max-width:350px){
+            .product-footer{flex-direction:column;align-items:stretch}
+            .product-price{text-align:center;margin-bottom:0.5rem}
+            .product-actions{justify-content:center}
+        }
     </style>
 </head>
 <body>
@@ -526,8 +543,10 @@
         }
         function renderFeatured() { const featured = allProducts.filter(p => p.is_featured).slice(0, 6); document.getElementById('featuredGrid').innerHTML = featured.length ? featured.map(p => renderProductCard(p, true)).join('') : '<p style="text-align:center;color:#999;">Nema izdvojenih proizvoda</p>'; }
         function renderProducts() { const products = currentFilter ? allProducts.filter(p => p.category_id === currentFilter) : allProducts; document.getElementById('productsGrid').innerHTML = products.length ? products.map(p => renderProductCard(p, false)).join('') : '<p style="text-align:center;color:#999;">Nema proizvoda u ovoj kategoriji</p>'; }
-        function renderProductCard(p, isFeatured) { return `<div class="product-card" onclick="toggleProductCard(event, this)"><div class="product-image"><img src="${p.image_url}" alt="${p.name}" onerror="this.src='img1.jpg'">${isFeatured ? '<span class="product-badge new">NOVO</span>' : (p.badge ? `<span class="product-badge ${p.badge.toLowerCase()}">${p.badge}</span>` : '')}</div><div class="expand-hint">Prikaži opis <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div><div class="product-info"><div class="product-category">${p.category_name}</div><h3 class="product-name">${p.name}</h3><p class="product-desc">${p.description || ''}</p><div class="product-footer"><span class="product-price">${p.price.toLocaleString('sr')} <span>RSD</span></span><button class="add-btn" onclick="addToCart(${p.id})">Dodaj</button></div></div></div>`; }
-        function toggleProductCard(e, card) { if (e.target.closest('.add-btn')) return; if (window.innerWidth <= 768) { card.classList.toggle('expanded'); const hint = card.querySelector('.expand-hint'); if (hint) hint.innerHTML = card.classList.contains('expanded') ? 'Sakrij opis <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>' : 'Prikaži opis <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>'; } }
+        function renderProductCard(p, isFeatured) { return `<div class="product-card" onclick="toggleProductCard(event, this)"><div class="product-image"><img src="${p.image_url}" alt="${p.name}" onerror="this.src='img1.jpg'">${isFeatured ? '<span class="product-badge new">NOVO</span>' : (p.badge ? `<span class="product-badge ${p.badge.toLowerCase()}">${p.badge}</span>` : '')}</div><div class="expand-hint">Prikaži opis <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div><div class="product-info"><div class="product-category">${p.category_name}</div><h3 class="product-name">${p.name}</h3><p class="product-desc">${p.description || ''}</p><div class="product-footer"><span class="product-price">${p.price.toLocaleString('sr')} <span>RSD</span></span><div class="product-actions"><div class="qty-control"><button type="button" onclick="changeQty(event, ${p.id}, -1)">−</button><input type="number" id="qty-${p.id}" value="1" min="1" max="99" onclick="event.stopPropagation()"><button type="button" onclick="changeQty(event, ${p.id}, 1)">+</button></div><button class="add-btn" onclick="addToCartWithQty(event, ${p.id})">Dodaj</button></div></div></div></div>`; }
+        function toggleProductCard(e, card) { if (e.target.closest('.add-btn') || e.target.closest('.qty-control')) return; if (window.innerWidth <= 768) { card.classList.toggle('expanded'); const hint = card.querySelector('.expand-hint'); if (hint) hint.innerHTML = card.classList.contains('expanded') ? 'Sakrij opis <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>' : 'Prikaži opis <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>'; } }
+        function changeQty(e, productId, delta) { e.stopPropagation(); const input = document.getElementById('qty-' + productId); let val = parseInt(input.value) || 1; val += delta; if (val < 1) val = 1; if (val > 99) val = 99; input.value = val; }
+        function addToCartWithQty(e, productId) { e.stopPropagation(); const input = document.getElementById('qty-' + productId); const qty = parseInt(input.value) || 1; const p = allProducts.find(x => x.id === productId); if (!p) return; const existing = cart.find(x => x.id === productId); if (existing) existing.qty += qty; else cart.push({ id: p.id, name: p.name, price: p.price, image: p.image_url, qty: qty }); saveCart(); updateCartUI(); showToast(qty > 1 ? qty + 'x ' + p.name + ' dodato! ✓' : p.name + ' dodat! ✓'); input.value = 1; }
 
         // Cart
         function addToCart(id) { const p = allProducts.find(x => x.id === id); if (!p) return; const existing = cart.find(x => x.id === id); if (existing) existing.qty++; else cart.push({ id: p.id, name: p.name, price: p.price, image: p.image_url, qty: 1 }); saveCart(); updateCartUI(); showToast(p.name + ' dodat! ✓'); }
