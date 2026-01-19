@@ -562,47 +562,50 @@
             document.body.style.overflow = '';
         }
 
-        // ============ SEND ORDER - WHATSAPP FIRST, THEN DATABASE ============
+        // ============ SEND ORDER - WHATSAPP + BAZA ============
         function sendOrder() {
-            const name = document.getElementById('customerName').value.trim();
-            const phone = document.getElementById('customerPhone').value.trim();
-            const city = document.getElementById('customerCity').value.trim();
-            const address = document.getElementById('customerAddress').value.trim();
-            const note = document.getElementById('customerNote').value.trim();
+            var name = document.getElementById('customerName').value.trim();
+            var phone = document.getElementById('customerPhone').value.trim();
+            var city = document.getElementById('customerCity').value.trim();
+            var address = document.getElementById('customerAddress').value.trim();
+            var note = document.getElementById('customerNote').value.trim();
             
             if (!name || !phone || !city || !address) {
                 showToast('Popunite sva polja! ⚠️');
                 return;
             }
             
-            const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
+            var total = cart.reduce(function(s, i) { return s + (i.price * i.qty); }, 0);
             
-            // 1. BUILD WHATSAPP MESSAGE (ALWAYS WORKS)
-            let msg = '🕯️ *NOVA NARUDŽBINA - TAISS*\n\n';
+            // Sačuvaj kopiju korpe pre brisanja
+            var cartCopy = JSON.parse(JSON.stringify(cart));
+            
+            var msg = '🕯️ *NOVA NARUDŽBINA - TAISS*\n\n';
             msg += '👤 ' + name + '\n';
             msg += '📱 ' + phone + '\n';
             msg += '🏙️ ' + city + '\n';
             msg += '📍 ' + address + '\n';
             if (note) msg += '📝 ' + note + '\n';
             msg += '\n━━━━━━━━━━━━━━━\n🛒 *PROIZVODI:*\n';
-            cart.forEach(i => {
+            for (var j = 0; j < cart.length; j++) {
+                var i = cart[j];
                 msg += '• ' + i.name + ' x' + i.qty + ' = ' + (i.price * i.qty).toLocaleString('sr') + ' RSD\n';
-            });
+            }
             msg += '\n💰 *UKUPNO: ' + total.toLocaleString('sr') + ' RSD*\n💳 Plaćanje pouzećem';
             
-            // 2. OPEN WHATSAPP IMMEDIATELY
+            // 1. ODMAH otvori WhatsApp
             window.open('https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(msg), '_blank');
             
-            // 3. TRY TO SAVE TO DATABASE (in background, won't block)
-            saveOrderToDatabase(name, phone, city, address, note, total);
+            // 2. Sačuvaj u bazu (u pozadini)
+            saveOrderToDatabase(name, phone, city, address, note, total, cartCopy);
             
-            // 4. CLEAR CART AND CLOSE
+            // 3. Očisti korpu
             cart = [];
             saveCart();
             updateCartUI();
             closeCart();
             
-            // Reset form
+            // Reset forme
             document.getElementById('customerName').value = '';
             document.getElementById('customerPhone').value = '';
             document.getElementById('customerCity').value = '';
@@ -612,44 +615,92 @@
             showToast('Narudžbina poslata! 🎉');
         }
         
-        // Background save to database (non-blocking)
-        async function saveOrderToDatabase(name, phone, city, address, note, total) {
+        // Čuvanje u bazu (ne blokira WhatsApp)
+        async function saveOrderToDatabase(name, phone, city, address, note, total, cartItems) {
             try {
-                // Find or create customer
-                let customerId;
-                const existingCustomers = await supabaseFetch('customers', `?phone=eq.${encodeURIComponent(phone)}`);
+                // 1. Kreiraj ili pronađi kupca
+                var customerId = null;
                 
-                if (existingCustomers && existingCustomers.length > 0) {
-                    customerId = existingCustomers[0].id;
+                // Proveri da li kupac postoji
+                var existingRes = await fetch(SUPABASE_URL + '/rest/v1/customers?phone=eq.' + encodeURIComponent(phone), {
+                    headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+                });
+                var existing = await existingRes.json();
+                
+                if (existing && existing.length > 0) {
+                    customerId = existing[0].id;
                 } else {
-                    const newCustomer = await supabasePost('customers', {
-                        name: name,
-                        phone: phone,
-                        city: city,
-                        address: address
+                    // Kreiraj novog kupca
+                    var newCustRes = await fetch(SUPABASE_URL + '/rest/v1/customers', {
+                        method: 'POST',
+                        headers: {
+                            'apikey': SUPABASE_KEY,
+                            'Authorization': 'Bearer ' + SUPABASE_KEY,
+                            'Content-Type': 'application/json',
+                            'Prefer': 'return=representation'
+                        },
+                        body: JSON.stringify({ name: name, phone: phone, city: city, address: address })
                     });
-                    if (newCustomer && newCustomer.length > 0) {
-                        customerId = newCustomer[0].id;
+                    var newCust = await newCustRes.json();
+                    if (newCust && newCust.length > 0) {
+                        customerId = newCust[0].id;
                     }
                 }
                 
-                if (!customerId) return;
+                if (!customerId) {
+                    console.log('Nije kreiran kupac');
+                    return;
+                }
                 
-                // Create order
-                const cartCopy = JSON.parse(localStorage.getItem('taiss_last_order') || '[]');
-                const orderData = {
-                    customer_id: customerId,
-                    status: 'new',
-                    total: total,
-                    note: note || null
-                };
+                // 2. Kreiraj porudžbinu
+                var orderRes = await fetch(SUPABASE_URL + '/rest/v1/orders', {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': 'Bearer ' + SUPABASE_KEY,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=representation'
+                    },
+                    body: JSON.stringify({
+                        customer_id: customerId,
+                        status: 'new',
+                        total: total,
+                        note: note || null
+                    })
+                });
+                var orderData = await orderRes.json();
                 
-                await supabasePost('orders', orderData);
-                console.log('Order saved to database');
+                if (!orderData || orderData.length === 0) {
+                    console.log('Nije kreirana porudžbina');
+                    return;
+                }
+                
+                var orderId = orderData[0].id;
+                
+                // 3. Kreiraj stavke porudžbine
+                for (var i = 0; i < cartItems.length; i++) {
+                    var item = cartItems[i];
+                    await fetch(SUPABASE_URL + '/rest/v1/order_items', {
+                        method: 'POST',
+                        headers: {
+                            'apikey': SUPABASE_KEY,
+                            'Authorization': 'Bearer ' + SUPABASE_KEY,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            order_id: orderId,
+                            product_id: item.id,
+                            quantity: item.qty,
+                            price: item.price
+                        })
+                    });
+                }
+                
+                console.log('Porudžbina #' + orderId + ' sačuvana u bazu!');
                 
             } catch (error) {
-                console.log('Could not save to database:', error);
-                // Silently fail - WhatsApp already sent
+                console.log('Greška pri čuvanju u bazu:', error);
+                // Ne prikazuj grešku korisniku - WhatsApp je već poslat
             }
         }
 
