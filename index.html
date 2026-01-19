@@ -83,24 +83,24 @@
         .hero-slide{position:absolute;inset:0;opacity:0;transition:opacity 1.5s ease-in-out}
         .hero-slide.active{opacity:1}
         .hero-slide img{width:100%;height:100%;object-fit:cover;object-position:center 30%}
-        .hero-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0.2) 0%,rgba(0,0,0,0.4) 50%,rgba(0,0,0,0.6) 100%);z-index:2}
-        .hero-content{position:relative;z-index:3;text-align:center;padding:1.5rem;max-width:600px;color:white}
-        .hero-badge{display:inline-block;background:rgba(255,255,255,0.15);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.25);padding:0.4rem 1rem;border-radius:50px;font-size:0.65rem;color:white;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:1.2rem}
-        .hero-title{font-family:'Cormorant Garamond',serif;font-size:2.5rem;font-weight:300;line-height:1.1;margin-bottom:0.8rem;text-shadow:0 2px 15px rgba(0,0,0,0.3)}
-        .hero-title span{display:block;font-style:italic;color:var(--gold-light);font-size:1.8rem}
-        .hero-tagline{font-size:0.9rem;font-weight:300;color:rgba(255,255,255,0.9);margin-bottom:1.5rem}
-        .hero-features{display:flex;justify-content:center;gap:1.2rem;flex-wrap:wrap;margin-bottom:1.8rem}
-        .hero-feature{display:flex;align-items:center;gap:0.3rem;font-size:0.7rem;color:rgba(255,255,255,0.85)}
-        .hero-feature svg{width:14px;height:14px;stroke:var(--gold-light)}
-        .hero-btns{display:flex;gap:0.8rem;justify-content:center;flex-wrap:wrap}
-        .btn{display:inline-flex;align-items:center;gap:0.4rem;padding:0.8rem 1.8rem;font-size:0.8rem;font-weight:500;text-decoration:none;border-radius:50px;transition:all 0.3s;font-family:inherit;cursor:pointer;border:none}
+        .hero-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0.15) 0%,rgba(0,0,0,0.35) 40%,rgba(0,0,0,0.55) 100%);z-index:2}
+        .hero-content{position:relative;z-index:3;text-align:center;padding:2rem 1.5rem;max-width:650px;color:white}
+        .hero-badge{display:inline-block;background:rgba(255,255,255,0.12);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.2);padding:0.6rem 1.4rem;border-radius:50px;font-size:0.7rem;color:white;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:1.5rem;font-weight:500}
+        .hero-title{font-family:'Cormorant Garamond',serif;font-size:3.2rem;font-weight:300;line-height:1.05;margin-bottom:0.6rem;text-shadow:0 3px 20px rgba(0,0,0,0.4)}
+        .hero-title span{display:block;font-style:italic;color:var(--gold-light);font-size:2rem;margin-top:0.3rem}
+        .hero-tagline{font-size:1rem;font-weight:300;color:rgba(255,255,255,0.95);margin-bottom:2rem;line-height:1.5}
+        .hero-features{display:flex;justify-content:center;gap:1.5rem;flex-wrap:wrap;margin-bottom:2.2rem}
+        .hero-feature{display:flex;align-items:center;gap:0.4rem;font-size:0.8rem;color:rgba(255,255,255,0.9);font-weight:400}
+        .hero-feature svg{width:16px;height:16px;stroke:var(--gold-light);stroke-width:2}
+        .hero-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+        .btn{display:inline-flex;align-items:center;gap:0.5rem;padding:1rem 2.2rem;font-size:0.9rem;font-weight:500;text-decoration:none;border-radius:50px;transition:all 0.3s;font-family:inherit;cursor:pointer;border:none}
         .btn-primary{background:var(--gold);color:white}
-        .btn-primary:hover{background:var(--gold-dark)}
-        .btn-outline{background:transparent;color:white;border:1.5px solid rgba(255,255,255,0.5)}
-        .btn-outline:hover{background:rgba(255,255,255,0.1)}
-        .hero-indicators{position:absolute;bottom:1.5rem;left:50%;transform:translateX(-50%);z-index:4;display:flex;gap:0.6rem}
+        .btn-primary:hover{background:var(--gold-dark);transform:translateY(-2px)}
+        .btn-outline{background:rgba(255,255,255,0.1);color:white;border:1.5px solid rgba(255,255,255,0.4)}
+        .btn-outline:hover{background:rgba(255,255,255,0.2)}
+        .hero-indicators{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);z-index:4;display:flex;gap:0.8rem}
         .indicator{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,0.4);cursor:pointer;transition:all 0.3s;border:none}
-        .indicator.active{background:var(--gold);transform:scale(1.2)}
+        .indicator.active{background:var(--gold);transform:scale(1.3)}
 
         /* ==================== SECTIONS ==================== */
         .section-label{font-size:0.7rem;color:var(--gold);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:0.8rem;display:flex;align-items:center;justify-content:center;gap:0.6rem}
@@ -226,11 +226,21 @@
 
         /* ==================== RESPONSIVE ==================== */
         @media(min-width:1024px){
-            .hero-title{font-size:4rem}
-            .hero-title span{font-size:2.5rem}
+            .hero-title{font-size:4.5rem}
+            .hero-title span{font-size:2.8rem}
+            .hero-tagline{font-size:1.1rem}
+            .hero-badge{font-size:0.75rem;padding:0.7rem 1.6rem}
         }
         @media(max-width:768px){
             .hero{margin-top:var(--header-height);height:calc(100vh - var(--header-height));height:calc(100dvh - var(--header-height))}
+            .hero-content{padding:1.5rem 1.2rem}
+            .hero-title{font-size:2.8rem}
+            .hero-title span{font-size:1.7rem}
+            .hero-tagline{font-size:0.95rem}
+            .hero-badge{font-size:0.65rem;padding:0.5rem 1.2rem}
+            .hero-features{gap:1rem}
+            .hero-feature{font-size:0.75rem}
+            .btn{padding:0.9rem 1.8rem;font-size:0.85rem}
             .about-inner{grid-template-columns:1fr;text-align:center}
             .about-image{max-width:400px;margin:0 auto}
             .about-features{justify-content:center}
@@ -245,9 +255,15 @@
         }
         @media(max-width:480px){
             .products-grid,.featured-grid{grid-template-columns:1fr}
-            .hero-title{font-size:2rem}
-            .hero-title span{font-size:1.4rem}
-            .hero-features{gap:0.8rem}
+            .hero-content{padding:1.2rem 1rem}
+            .hero-title{font-size:2.4rem}
+            .hero-title span{font-size:1.5rem}
+            .hero-tagline{font-size:0.9rem;margin-bottom:1.5rem}
+            .hero-badge{font-size:0.6rem;padding:0.45rem 1rem;margin-bottom:1.2rem}
+            .hero-features{gap:0.8rem;margin-bottom:1.8rem}
+            .hero-feature{font-size:0.7rem}
+            .hero-btns{gap:0.8rem}
+            .btn{padding:0.85rem 1.5rem;font-size:0.8rem}
             .features-inner{grid-template-columns:1fr 1fr}
         }
     </style>
