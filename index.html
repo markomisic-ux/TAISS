@@ -34,7 +34,7 @@
         .hero-carousel{position:absolute;inset:0;z-index:1}
         .hero-slide{position:absolute;inset:0;opacity:0;transition:opacity 1.5s ease-in-out}
         .hero-slide.active{opacity:1}
-        .hero-slide img{width:100%;height:100%;object-fit:cover}
+        .hero-slide img{width:100%;height:100%;object-fit:cover;object-position:center 30%}
         .hero-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0.2) 0%,rgba(0,0,0,0.4) 50%,rgba(0,0,0,0.6) 100%);z-index:2}
         
         .hero-content{position:relative;z-index:3;text-align:center;padding:1.5rem;max-width:600px;color:white;margin-top:40px}
@@ -210,12 +210,11 @@
         <button class="cart-btn" onclick="openCart()"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg><span>Korpa</span><span class="cart-badge" id="cartBadge">0</span></button>
     </div></nav>
 
-    <!-- HERO -->
+    <!-- HERO - Dynamically loaded from Supabase -->
     <section class="hero">
-        <div class="hero-carousel">
-            <div class="hero-slide active"><img src="img11.jpg" alt="TAISS Buket Bordo"></div>
-            <div class="hero-slide"><img src="img12.jpg" alt="TAISS Buket Roze"></div>
-            <div class="hero-slide"><img src="img13.jpg" alt="TAISS Buket Bež"></div>
+        <div class="hero-carousel" id="heroCarousel">
+            <!-- Slides will be loaded dynamically -->
+            <div class="hero-slide active"><img src="img11.jpg" alt="TAISS"></div>
         </div>
         <div class="hero-overlay"></div>
         <div class="hero-content">
@@ -232,10 +231,8 @@
                 <a href="https://wa.me/381607000158" class="btn btn-outline">Kontakt</a>
             </div>
         </div>
-        <div class="hero-indicators">
-            <button class="indicator active" onclick="goToSlide(0)"></button>
-            <button class="indicator" onclick="goToSlide(1)"></button>
-            <button class="indicator" onclick="goToSlide(2)"></button>
+        <div class="hero-indicators" id="heroIndicators">
+            <!-- Indicators will be loaded dynamically -->
         </div>
     </section>
 
@@ -322,21 +319,98 @@
             return response.json();
         }
 
-        // Global products array
+        // Global variables
         let allProducts = [];
+        let heroSlides = [];
+        let currentSlide = 0;
+        let slideInterval = null;
 
-        // Load products from Supabase
+        // ============ HERO CAROUSEL - Dynamic Loading ============
+        async function loadHeroSlides() {
+            try {
+                const data = await supabaseFetch('hero_slides', '?is_active=eq.true&order=sort_order.asc');
+                
+                // If no slides in database, use fallback
+                if (!data || data.length === 0 || data.error) {
+                    console.log('No hero slides in database, using fallback');
+                    heroSlides = [
+                        { image_url: 'img11.jpg', alt_text: 'TAISS Buket Bordo' },
+                        { image_url: 'img12.jpg', alt_text: 'TAISS Buket Roze' },
+                        { image_url: 'img13.jpg', alt_text: 'TAISS Buket Bež' }
+                    ];
+                } else {
+                    heroSlides = data;
+                }
+                
+                renderHeroCarousel();
+                startCarousel();
+            } catch (error) {
+                console.error('Error loading hero slides:', error);
+                // Fallback to default slides
+                heroSlides = [
+                    { image_url: 'img11.jpg', alt_text: 'TAISS Buket Bordo' },
+                    { image_url: 'img12.jpg', alt_text: 'TAISS Buket Roze' },
+                    { image_url: 'img13.jpg', alt_text: 'TAISS Buket Bež' }
+                ];
+                renderHeroCarousel();
+                startCarousel();
+            }
+        }
+
+        function renderHeroCarousel() {
+            const carousel = document.getElementById('heroCarousel');
+            const indicators = document.getElementById('heroIndicators');
+            
+            // Render slides
+            carousel.innerHTML = heroSlides.map((slide, index) => `
+                <div class="hero-slide ${index === 0 ? 'active' : ''}">
+                    <img src="${slide.image_url}" alt="${slide.alt_text || 'TAISS'}" onerror="this.src='img11.jpg'">
+                </div>
+            `).join('');
+            
+            // Render indicators
+            indicators.innerHTML = heroSlides.map((_, index) => `
+                <button class="indicator ${index === 0 ? 'active' : ''}" onclick="goToSlide(${index})"></button>
+            `).join('');
+        }
+
+        function goToSlide(n) {
+            const slides = document.querySelectorAll('.hero-slide');
+            const indicators = document.querySelectorAll('.indicator');
+            
+            if (slides.length === 0) return;
+            
+            slides[currentSlide].classList.remove('active');
+            indicators[currentSlide].classList.remove('active');
+            
+            currentSlide = n;
+            if (currentSlide >= slides.length) currentSlide = 0;
+            if (currentSlide < 0) currentSlide = slides.length - 1;
+            
+            slides[currentSlide].classList.add('active');
+            indicators[currentSlide].classList.add('active');
+        }
+
+        function nextSlide() {
+            goToSlide(currentSlide + 1);
+        }
+
+        function startCarousel() {
+            if (slideInterval) clearInterval(slideInterval);
+            if (heroSlides.length > 1) {
+                slideInterval = setInterval(nextSlide, 4000);
+            }
+        }
+
+        // ============ PRODUCTS ============
         async function loadProducts() {
             try {
-                // Fetch all active products with categories
                 const products = await supabaseFetch('products', '?is_active=eq.true&order=sort_order.asc');
                 const categories = await supabaseFetch('categories');
                 
-                // Create category map
                 const categoryMap = {};
                 categories.forEach(c => categoryMap[c.id] = c.name);
                 
-                // Add category names to products
                 allProducts = products.map(p => ({
                     ...p,
                     category_name: categoryMap[p.category_id] || 'Sveće'
@@ -351,21 +425,6 @@
             }
         }
 
-        // Carousel
-        let currentSlide = 0;
-        const slides = document.querySelectorAll('.hero-slide');
-        const indicators = document.querySelectorAll('.indicator');
-        function goToSlide(n) {
-            slides[currentSlide].classList.remove('active');
-            indicators[currentSlide].classList.remove('active');
-            currentSlide = n;
-            slides[currentSlide].classList.add('active');
-            indicators[currentSlide].classList.add('active');
-        }
-        function nextSlide() { goToSlide((currentSlide + 1) % slides.length); }
-        setInterval(nextSlide, 4000);
-
-        // Render Featured Products (is_featured = true)
         function renderFeatured() {
             const featured = allProducts.filter(p => p.is_featured);
             if (featured.length === 0) {
@@ -386,7 +445,6 @@
             `).join('');
         }
 
-        // Render All Products
         function renderProducts() {
             if (allProducts.length === 0) {
                 document.getElementById('productsGrid').innerHTML = '<p style="text-align:center;color:#999;">Nema proizvoda</p>';
@@ -411,7 +469,7 @@
             `).join('');
         }
 
-        // Cart functionality
+        // ============ CART ============
         let cart = JSON.parse(localStorage.getItem('taiss_cart')) || [];
 
         function addToCart(id) {
@@ -422,13 +480,7 @@
             if (existing) {
                 existing.qty++;
             } else {
-                cart.push({
-                    id: p.id,
-                    name: p.name,
-                    price: p.price,
-                    image: p.image_url,
-                    qty: 1
-                });
+                cart.push({ id: p.id, name: p.name, price: p.price, image: p.image_url, qty: 1 });
             }
             saveCart();
             updateCartUI();
@@ -439,9 +491,7 @@
             const item = cart.find(x => x.id === id);
             if (item) {
                 item.qty += d;
-                if (item.qty <= 0) {
-                    cart = cart.filter(x => x.id !== id);
-                }
+                if (item.qty <= 0) cart = cart.filter(x => x.id !== id);
                 saveCart();
                 updateCartUI();
             }
@@ -547,7 +597,8 @@
             setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
-        // Initialize
+        // ============ INITIALIZE ============
+        loadHeroSlides();  // Load hero from database
         loadProducts();
         updateCartUI();
     </script>
