@@ -84,15 +84,18 @@
         .hero-slide.active{opacity:1}
         .hero-slide img{width:100%;height:100%;object-fit:cover;object-position:center 30%}
         .hero-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0.15) 0%,rgba(0,0,0,0.35) 40%,rgba(0,0,0,0.55) 100%);z-index:2}
-        .hero-content{position:relative;z-index:3;text-align:center;padding:2rem 1.5rem;max-width:650px;color:white}
-        .hero-badge{display:inline-block;background:rgba(255,255,255,0.12);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.2);padding:0.6rem 1.4rem;border-radius:50px;font-size:0.7rem;color:white;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:1.5rem;font-weight:500}
+        .hero-content{position:relative;z-index:3;text-align:center;padding:2rem 1.5rem;max-width:650px;color:white;display:flex;flex-direction:column;align-items:center;min-height:70vh;justify-content:space-between}
+        .hero-top{padding-top:2rem}
+        .hero-middle{flex:1;display:flex;flex-direction:column;justify-content:center}
+        .hero-bottom{padding-bottom:1rem}
+        .hero-badge{display:inline-block;background:rgba(255,255,255,0.12);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.2);padding:0.6rem 1.4rem;border-radius:50px;font-size:0.7rem;color:white;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:0;font-weight:500}
         .hero-title{font-family:'Cormorant Garamond',serif;font-size:3.2rem;font-weight:300;line-height:1.05;margin-bottom:0.6rem;text-shadow:0 3px 20px rgba(0,0,0,0.4)}
         .hero-title span{display:block;font-style:italic;color:var(--gold-light);font-size:2rem;margin-top:0.3rem}
-        .hero-tagline{font-size:1rem;font-weight:300;color:rgba(255,255,255,0.95);margin-bottom:2rem;line-height:1.5}
-        .hero-features{display:flex;justify-content:center;gap:1.5rem;flex-wrap:wrap;margin-bottom:2.2rem}
+        .hero-tagline{font-size:1rem;font-weight:300;color:rgba(255,255,255,0.95);margin-bottom:1.5rem;line-height:1.5}
+        .hero-features{display:flex;justify-content:center;gap:1.5rem;flex-wrap:wrap;margin-bottom:0}
         .hero-feature{display:flex;align-items:center;gap:0.4rem;font-size:0.8rem;color:rgba(255,255,255,0.9);font-weight:400}
         .hero-feature svg{width:16px;height:16px;stroke:var(--gold-light);stroke-width:2}
-        .hero-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+        .hero-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-top:1rem}
         .btn{display:inline-flex;align-items:center;gap:0.5rem;padding:1rem 2.2rem;font-size:0.9rem;font-weight:500;text-decoration:none;border-radius:50px;transition:all 0.3s;font-family:inherit;cursor:pointer;border:none}
         .btn-primary{background:var(--gold);color:white}
         .btn-primary:hover{background:var(--gold-dark);transform:translateY(-2px)}
@@ -246,7 +249,9 @@
         }
         @media(max-width:768px){
             .hero{margin-top:var(--header-height);height:calc(100vh - var(--header-height));height:calc(100dvh - var(--header-height))}
-            .hero-content{padding:1.5rem 1.2rem}
+            .hero-content{padding:1.5rem 1.2rem;min-height:calc(100vh - var(--header-height) - 4rem)}
+            .hero-top{padding-top:1rem}
+            .hero-bottom{padding-bottom:2rem}
             .hero-title{font-size:2.8rem}
             .hero-title span{font-size:1.7rem}
             .hero-tagline{font-size:0.95rem}
@@ -275,12 +280,14 @@
         }
         @media(max-width:480px){
             .products-grid,.featured-grid{grid-template-columns:1fr}
-            .hero-content{padding:1.2rem 1rem}
+            .hero-content{padding:1.2rem 1rem;min-height:calc(100vh - var(--header-height) - 3rem)}
+            .hero-top{padding-top:0.5rem}
+            .hero-bottom{padding-bottom:3rem}
             .hero-title{font-size:2.4rem}
             .hero-title span{font-size:1.5rem}
-            .hero-tagline{font-size:0.9rem;margin-bottom:1.5rem}
-            .hero-badge{font-size:0.6rem;padding:0.45rem 1rem;margin-bottom:1.2rem}
-            .hero-features{gap:0.8rem;margin-bottom:1.8rem}
+            .hero-tagline{font-size:0.9rem;margin-bottom:1rem}
+            .hero-badge{font-size:0.6rem;padding:0.45rem 1rem}
+            .hero-features{gap:0.8rem}
             .hero-feature{font-size:0.7rem}
             .hero-btns{gap:0.8rem}
             .btn{padding:0.85rem 1.5rem;font-size:0.8rem}
@@ -376,17 +383,23 @@
         <div class="hero-carousel" id="heroCarousel"><div class="hero-slide active"><img src="img11.jpg" alt="TAISS"></div></div>
         <div class="hero-overlay"></div>
         <div class="hero-content">
-            <div class="hero-badge">✦ Premium Handcrafted in Serbia</div>
-            <h1 class="hero-title">TAISS<span>Luxury Candles</span></h1>
-            <p class="hero-tagline">Luksuzne sveće od 100% prirodnog sojinog voska</p>
-            <div class="hero-features">
-                <div class="hero-feature"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>Sojin Vosak</div>
-                <div class="hero-feature"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42"/></svg>Ručna Izrada</div>
-                <div class="hero-feature"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"/></svg>Premium Mirisi</div>
+            <div class="hero-top">
+                <div class="hero-badge">✦ Premium Handcrafted in Serbia</div>
             </div>
-            <div class="hero-btns">
-                <a href="#featured" class="btn btn-primary">Pogledaj Kolekciju</a>
-                <a href="https://wa.me/381607000158" class="btn btn-outline">Kontakt</a>
+            <div class="hero-middle">
+                <h1 class="hero-title">TAISS<span>Luxury Candles</span></h1>
+                <p class="hero-tagline">Luksuzne sveće od 100% prirodnog sojinog voska</p>
+                <div class="hero-features">
+                    <div class="hero-feature"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>Sojin Vosak</div>
+                    <div class="hero-feature"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42"/></svg>Ručna Izrada</div>
+                    <div class="hero-feature"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"/></svg>Premium Mirisi</div>
+                </div>
+            </div>
+            <div class="hero-bottom">
+                <div class="hero-btns">
+                    <a href="#featured" class="btn btn-primary">Pogledaj Kolekciju</a>
+                    <a href="https://wa.me/381607000158" class="btn btn-outline">Kontakt</a>
+                </div>
             </div>
         </div>
         <div class="hero-indicators" id="heroIndicators"></div>
