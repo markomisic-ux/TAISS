@@ -76,6 +76,20 @@
         .hero-card-info{padding:1rem}
         .hero-card-title{font-weight:600;margin-bottom:0.25rem}
         .hero-card-url{font-size:0.75rem;color:var(--text-light);word-break:break-all}
+        .video-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1rem}
+        .video-card{background:var(--bg);border-radius:12px;overflow:hidden;position:relative}
+        .video-card-th{position:relative;aspect-ratio:9/14;background:#e9e5df}
+        .video-card-th img,.video-card-th video{width:100%;height:100%;object-fit:cover;display:block}
+        .video-type-badge{position:absolute;top:8px;left:8px;background:#722f37;color:#fff;font-size:0.62rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:3px 7px;border-radius:6px}
+        .video-off{position:absolute;inset:0;background:rgba(255,255,255,.55);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--text-light);letter-spacing:.08em}
+        .video-card-info{padding:0.7rem 0.8rem;font-size:0.8rem}
+        .video-card-info b{display:block;margin-bottom:2px}
+        .video-card-info small{color:var(--text-light);display:block}
+        .video-card-actions{display:flex;align-items:center;gap:.4rem;padding:.6rem .8rem;border-top:1px solid var(--border)}
+        .vswitch{position:relative;width:40px;height:24px;border-radius:12px;border:0;background:#d6d3ce;cursor:pointer;flex:0 0 auto}
+        .vswitch.on{background:var(--success)}
+        .vswitch i{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:9px;background:#fff;transition:.2s}
+        .vswitch.on i{left:19px}
         .hero-card-actions{display:flex;gap:0.5rem;margin-top:0.75rem}
         .hero-card-order{position:absolute;top:0.75rem;left:0.75rem;background:var(--primary);color:white;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:0.85rem}
         .hero-card-status{position:absolute;top:0.75rem;right:0.75rem}
@@ -285,6 +299,7 @@
         <ul class="sidebar-nav">
             <li><a href="#" class="active" data-page="dashboard"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"/></svg><span>Dashboard</span></a></li>
             <li><a href="#" data-page="hero"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg><span>Hero Slike</span></a></li>
+            <li><a href="#" data-page="videos"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z"/></svg><span>Video</span></a></li>
             <li><a href="#" data-page="products"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"/></svg><span>Proizvodi</span></a></li>
             <li><a href="#" data-page="categories"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z"/><path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z"/></svg><span>Kategorije</span></a></li>
             <li><a href="#" data-page="orders"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg><span>Porudžbine</span></a></li>
@@ -338,6 +353,19 @@
             <div class="card">
                 <div class="card-header"><h2>Aktivne slike na početnoj stranici</h2></div>
                 <div class="hero-grid" id="heroGrid"><div class="hero-empty">Učitavanje...</div></div>
+            </div>
+        </div>
+
+        <div class="page" id="page-videos">
+            <div class="header"><h1>🎬 Video Sadržaj</h1><button class="btn btn-primary" onclick="openVideoModal()">+ Dodaj Video</button></div>
+            <div class="info-box">
+                <strong>📐 Preporučeni format za video:</strong>
+                MP4 | Vertikalno <b>9:16</b> (1080 x 1920) | Trajanje: do <b>30 sekundi</b> | Veličina: idealno <b>2–5 MB</b>, max 50 MB<br>
+                Snimci se prikazuju na novom sajtu: Reels „Pogledaj i kupi", Story krugovi, na stranici proizvoda i u O nama sekciji. Poster sličica se pravi automatski.
+            </div>
+            <div class="card">
+                <div class="card-header"><h2>Svi snimci</h2></div>
+                <div class="video-grid" id="videosGrid"><div class="hero-empty">Učitavanje...</div></div>
             </div>
         </div>
 
@@ -451,6 +479,40 @@
     </main>
 
     <!-- Hero Modal -->
+    <div class="modal-overlay" id="video-modal">
+        <div class="modal">
+            <div class="modal-header"><h3 id="video-modal-title">Dodaj Video</h3><button class="modal-close" onclick="closeModal('video-modal')">✕</button></div>
+            <div class="modal-body">
+                <input type="hidden" id="video-id">
+                <div class="upload-area" id="videoUploadArea" onclick="document.getElementById('videoFileInput').click()">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
+                    <p>Klikni i izaberi video fajl</p><small>MP4 • 9:16 • do 30s • idealno 2–5 MB</small>
+                </div>
+                <input type="file" id="videoFileInput" class="upload-input" accept="video/mp4,video/quicktime,video/webm" onchange="handleVideoUpload(event)">
+                <div class="upload-progress" id="videoUploadProgress"><div class="progress-bar"><div class="progress-fill" id="videoProgressFill"></div></div><small style="color:var(--text-light)">Uploadovanje...</small></div>
+                <div class="form-group"><label>URL snimka *</label><input type="text" id="video-url" placeholder="automatski posle uploada, ili nalepi URL"></div>
+                <div class="form-group"><label>URL poster sličice</label><input type="text" id="video-poster" placeholder="automatski iz snimka"></div>
+                <div class="form-group"><label>Naslov / opis (vidi se na snimku)</label><input type="text" id="video-title" maxlength="90" placeholder="npr. Pakujemo buket za poklon"></div>
+                <div class="form-row">
+                    <div class="form-group"><label>Gde se prikazuje</label>
+                        <select id="video-type" onchange="videoTypeUi()">
+                            <option value="reel">Reels – „Pogledaj i kupi"</option>
+                            <option value="story">Story krug</option>
+                            <option value="product">Na stranici proizvoda</option>
+                            <option value="hero">O nama / veliki video</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Povezani proizvod</label><select id="video-product"><option value="">— bez proizvoda —</option></select></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group" id="videoGroupField"><label>Story grupa (krug)</label><input type="text" id="video-group" list="videoGroupList" placeholder="npr. Kako nastaje"><datalist id="videoGroupList"><option value="Kako nastaje"><option value="Novo"><option value="Pokloni"><option value="Za firme"><option value="Utisci"></datalist></div>
+                    <div class="form-group"><label>Redosled</label><input type="number" id="video-order" value="0"></div>
+                </div>
+                <div class="form-group"><label>Status</label><select id="video-active"><option value="true">Aktivan (vidljiv na sajtu)</option><option value="false">Neaktivan</option></select></div>
+            </div>
+            <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('video-modal')">Otkaži</button><button class="btn btn-primary" onclick="saveVideo()">Sačuvaj</button></div>
+        </div>
+    </div>
     <div class="modal-overlay" id="hero-modal">
         <div class="modal">
             <div class="modal-header"><h3 id="hero-modal-title">Dodaj Hero Sliku</h3><button class="modal-close" onclick="closeModal('hero-modal')">✕</button></div>
@@ -842,7 +904,130 @@
             });
         }
 
-        async function loadAll() { await loadCategories(); await loadProducts(); await loadOrders(); await loadCustomers(); await loadHeroSlides(); await loadAboutContent(); updateStats(); }
+        async function loadAll() { await loadCategories(); await loadProducts(); await loadOrders(); await loadCustomers(); await loadHeroSlides(); await loadVideos(); await loadAboutContent(); updateStats(); }
+
+        /* ===== VIDEO sekcija ===== */
+        let videosList = [];
+        const VIDEO_TYPES = { reel: 'Reels', story: 'Story', product: 'Proizvod', hero: 'O nama' };
+        function videoTypeUi() { document.getElementById('videoGroupField').style.display = document.getElementById('video-type').value === 'story' ? '' : 'none'; }
+        async function loadVideos() {
+            const { data, error } = await db.from('videos').select('*').order('sort_order');
+            const grid = document.getElementById('videosGrid');
+            if (error) { grid.innerHTML = '<div class="hero-empty">⚠️ Tabela videos ne postoji ili nema dozvole. Pokreni SQL iz uputstva.</div>'; return; }
+            videosList = data || [];
+            renderVideos();
+        }
+        function renderVideos() {
+            const grid = document.getElementById('videosGrid');
+            if (!videosList.length) { grid.innerHTML = '<div class="hero-empty">Još nema snimaka. Dodaj prvi – pojaviće se na novom sajtu čim bude aktivan. 🎬</div>'; return; }
+            grid.innerHTML = videosList.map(v => {
+                const p = products.find(x => x.id === v.product_id);
+                return `<div class="video-card"><div class="video-card-th">${v.poster_url ? `<img src="${v.poster_url}" loading="lazy">` : (v.video_url ? `<video src="${v.video_url}#t=0.5" preload="metadata" muted></video>` : '')}<span class="video-type-badge">${VIDEO_TYPES[v.type] || v.type}</span>${v.is_active ? '' : '<span class="video-off">NEAKTIVAN</span>'}</div><div class="video-card-info"><b>${v.title || '(bez naslova)'}</b>${v.story_group ? `<small>Grupa: ${v.story_group}</small>` : ''}${p ? `<small>→ ${p.name}</small>` : ''}<small>Redosled: ${v.sort_order || 0}</small></div><div class="video-card-actions"><button class="vswitch ${v.is_active ? 'on' : ''}" onclick="toggleVideo(${v.id})" title="Uključi/isključi"><i></i></button><button class="btn btn-secondary btn-sm" style="flex:1" onclick="editVideo(${v.id})">Izmeni</button><button class="btn btn-danger btn-sm" onclick="deleteVideo(${v.id})">Obriši</button></div></div>`;
+            }).join('');
+        }
+        function populateVideoProducts() {
+            document.getElementById('video-product').innerHTML = '<option value="">— bez proizvoda —</option>' + products.filter(p => p.is_active !== false).map(p => `<option value="${p.id}">${p.name} (${p.price} RSD)</option>`).join('');
+        }
+        function openVideoModal() {
+            populateVideoProducts();
+            document.getElementById('video-modal-title').textContent = 'Dodaj Video';
+            ['video-id','video-url','video-poster','video-title','video-group'].forEach(id => document.getElementById(id).value = '');
+            document.getElementById('video-type').value = 'reel';
+            document.getElementById('video-product').value = '';
+            document.getElementById('video-order').value = videosList.length;
+            document.getElementById('video-active').value = 'true';
+            videoTypeUi(); openModal('video-modal');
+        }
+        function editVideo(id) {
+            const v = videosList.find(x => x.id === id); if (!v) return;
+            populateVideoProducts();
+            document.getElementById('video-modal-title').textContent = 'Izmeni Video';
+            document.getElementById('video-id').value = v.id;
+            document.getElementById('video-url').value = v.video_url || '';
+            document.getElementById('video-poster').value = v.poster_url || '';
+            document.getElementById('video-title').value = v.title || '';
+            document.getElementById('video-type').value = v.type || 'reel';
+            document.getElementById('video-product').value = v.product_id || '';
+            document.getElementById('video-group').value = v.story_group || '';
+            document.getElementById('video-order').value = v.sort_order || 0;
+            document.getElementById('video-active').value = v.is_active ? 'true' : 'false';
+            videoTypeUi(); openModal('video-modal');
+        }
+        async function saveVideo() {
+            const id = document.getElementById('video-id').value;
+            const data = {
+                title: document.getElementById('video-title').value.trim() || null,
+                type: document.getElementById('video-type').value,
+                video_url: document.getElementById('video-url').value.trim() || null,
+                poster_url: document.getElementById('video-poster').value.trim() || null,
+                product_id: document.getElementById('video-product').value ? parseInt(document.getElementById('video-product').value) : null,
+                story_group: document.getElementById('video-type').value === 'story' ? (document.getElementById('video-group').value.trim() || 'Story') : null,
+                sort_order: parseInt(document.getElementById('video-order').value) || 0,
+                is_active: document.getElementById('video-active').value === 'true'
+            };
+            if (!data.video_url) { showToast('Dodaj snimak (upload ili URL) ⚠️'); return; }
+            const result = id ? await db.from('videos').update(data).eq('id', id) : await db.from('videos').insert([data]);
+            if (result.error) { showToast('Greška: ' + result.error.message); return; }
+            showToast('Sačuvano ✓'); closeModal('video-modal'); loadVideos();
+        }
+        async function toggleVideo(id) {
+            const v = videosList.find(x => x.id === id); if (!v) return;
+            const { error } = await db.from('videos').update({ is_active: !v.is_active }).eq('id', id);
+            if (error) { showToast('Greška: ' + error.message); return; }
+            loadVideos();
+        }
+        async function deleteVideo(id) {
+            if (!confirm('Obrisati ovaj video sa sajta?')) return;
+            const { error } = await db.from('videos').delete().eq('id', id);
+            if (error) { showToast('Greška: ' + error.message); return; }
+            showToast('Obrisano'); loadVideos();
+        }
+        async function handleVideoUpload(event) {
+            const file = event.target.files[0]; if (!file) return;
+            if (file.size > 50 * 1024 * 1024) { showToast('Fajl veći od 50 MB – smanji ga pre uploada ⚠️'); return; }
+            if (file.size > 12 * 1024 * 1024) showToast('Snimak je ' + Math.round(file.size / 1048576) + ' MB – radiće, ali je idealno 2–5 MB');
+            const progressEl = document.getElementById('videoUploadProgress');
+            const fillEl = document.getElementById('videoProgressFill');
+            progressEl.classList.add('show'); fillEl.style.width = '20%';
+            try {
+                const ts = Date.now();
+                const ext = (file.name.split('.').pop() || 'mp4').toLowerCase();
+                const vName = `videos/video_${ts}.${ext}`;
+                const { error } = await db.storage.from(STORAGE_BUCKET).upload(vName, file, { cacheControl: '3600', upsert: false });
+                if (error) throw error;
+                fillEl.style.width = '70%';
+                document.getElementById('video-url').value = db.storage.from(STORAGE_BUCKET).getPublicUrl(vName).data.publicUrl;
+                try {
+                    const blob = await grabVideoPoster(file);
+                    if (blob) {
+                        const pName = `videos/poster_${ts}.jpg`;
+                        const up2 = await db.storage.from(STORAGE_BUCKET).upload(pName, blob, { cacheControl: '3600', upsert: false, contentType: 'image/jpeg' });
+                        if (!up2.error) document.getElementById('video-poster').value = db.storage.from(STORAGE_BUCKET).getPublicUrl(pName).data.publicUrl;
+                    }
+                } catch (e) {}
+                fillEl.style.width = '100%'; showToast('Snimak otpremljen ✓');
+            } catch (error) { showToast('Greška pri uploadu: ' + error.message); }
+            setTimeout(() => { progressEl.classList.remove('show'); fillEl.style.width = '0%'; }, 1000);
+        }
+        function grabVideoPoster(file) {
+            return new Promise((res) => {
+                const v = document.createElement('video');
+                v.muted = true; v.playsInline = true; v.preload = 'metadata';
+                v.src = URL.createObjectURL(file);
+                v.onloadeddata = () => { v.currentTime = Math.min(0.5, (v.duration || 1) / 2); };
+                v.onseeked = () => {
+                    try {
+                        const c = document.createElement('canvas');
+                        const s = Math.min(1, 720 / Math.max(v.videoWidth, v.videoHeight));
+                        c.width = Math.round(v.videoWidth * s); c.height = Math.round(v.videoHeight * s);
+                        c.getContext('2d').drawImage(v, 0, 0, c.width, c.height);
+                        c.toBlob(b => { URL.revokeObjectURL(v.src); res(b); }, 'image/jpeg', 0.78);
+                    } catch (e) { res(null); }
+                };
+                v.onerror = () => res(null);
+                setTimeout(() => res(null), 8000);
+            });
+        }
 
         async function handleHeroUpload(event) { if (event.target.files[0]) uploadFile(event.target.files[0], 'hero'); }
         async function handleProductUpload(event) { if (event.target.files[0]) uploadFile(event.target.files[0], 'product'); }
